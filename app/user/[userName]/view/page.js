@@ -9,7 +9,7 @@ import { useSession, signOut } from "next-auth/react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const screenshotViewer = () => {
+const ScreenshotViewer = () => {
     const router = useRouter()
     const { data: session, status } = useSession();
     const [screenshots, setScreenshots] = useState([])
@@ -660,4 +660,4 @@ const screenshotViewer = () => {
     )
 }
 
-export default screenshotViewer
+export default ScreenshotViewer
