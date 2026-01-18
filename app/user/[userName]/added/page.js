@@ -219,7 +219,7 @@ export default function AddedPage({ params }) {
             const apitype = searchType == "anime" ? "anime" : "manga"
     
             const allGenresData = await allGenres(apitype);
-            const names = allGenresData.data.map(item => item.name);
+            const names = allGenresData.data?.map(item => item.name);
             setallGenreOption(names);
             setSelectedGenre([])
             //if searchType is anime then present the type anime format 
@@ -278,7 +278,7 @@ export default function AddedPage({ params }) {
                 <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 px-5 lg:px-0 md:px-0 grow'>
                     {
                         anime.length > 0 ? (
-                            anime.map((item) => {
+                            anime?.map((item) => {
                                 // // ✅ Define `type` here (inside curly braces, before return)
                                 // const type = item.category === "Movie"
                                 //     ? "anime"
@@ -463,14 +463,14 @@ export default function AddedPage({ params }) {
                                     defaultValue=""
                                 >
                                     <option value="" disabled>Select a genre</option>
-                                    {allGenreOption.map((genre, index) => (
+                                    {allGenreOption?.map((genre, index) => (
                                         <option key={index} value={genre} >
                                             {genre}
                                         </option>
                                     ))}
                                 </select>
                                 <div className="mt-2 flex flex-wrap gap-2 space-y-1">
-                                    {SelectedGenre.length > 0 && SelectedGenre.map((item, index) => (
+                                    {SelectedGenre.length > 0 && SelectedGenre?.map((item, index) => (
                                         <div className='relative' key={index}>
                                             <span className="mr-2 px-2 py-1 bg-gray-700 text-gray-200 rounded pr-5">
                                                 {item}
@@ -524,7 +524,7 @@ export default function AddedPage({ params }) {
                                         </option>
                                     ))} */}
                                     {
-                                        SelectionType.map((item, index) => (
+                                        SelectionType?.map((item, index) => (
                                             <option key={index} value={item.label} >
                                                 {item.label}
                                             </option>
@@ -532,7 +532,7 @@ export default function AddedPage({ params }) {
                                     }
                                 </select>
                                 <div className="mt-2 flex flex-wrap gap-2 space-y-1">
-                                    {SelectedType.length > 0 && SelectedType.map((item, index) => (
+                                    {SelectedType.length > 0 && SelectedType?.map((item, index) => (
                                         <div className='relative' key={index}>
                                             <span className="mr-2 px-2 py-1 bg-gray-700 text-gray-200 rounded pr-5">
                                                 {item}

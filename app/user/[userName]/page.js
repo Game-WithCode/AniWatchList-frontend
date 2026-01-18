@@ -22,28 +22,28 @@ const dashboard = async () => {
   const TopAnimeData = []
   const TopMangaData = []
 
-  fetchTopAnime.data.map((item, index) => {
+  fetchTopAnime.data?.map((item, index) => {
     if (index > 10) return
     const itemType = getCategory(item.type)
     TopAnimeData.push({
       mal_Id: item.mal_id,
       title: item.title_english,
       description: item.synopsis,
-      Genre: item.genres.map((i) => i.name),
+      Genre: item.genres?.map((i) => i.name),
       Scores: item.score,
       Images: item.images.webp.large_image_url,
       type: itemType,
       RawType: item.type
     })
   })
-  fetchTopManga.data.map((item, index) => {
+  fetchTopManga.data?.map((item, index) => {
     if (index > 10) return
     const itemType = getCategory(item.type)
     TopMangaData.push({
       mal_Id: item.mal_id,
       title: item.title_english,
       description: item.synopsis,
-      Genre: item.genres.map((i) => i.name),
+      Genre: item.genres?.map((i) => i.name),
       Scores: item.score,
       Images: item.images.webp.large_image_url,
       type: itemType,
@@ -75,7 +75,7 @@ const dashboard = async () => {
       return
     }
 
-    ItemDataList.ContinueReading.push({
+    ItemDataList.ContinueReading?.push({
       mal_id: item.mal_id,
       currentEpisode: item.chaptersProgress.length,
       title: item.title,

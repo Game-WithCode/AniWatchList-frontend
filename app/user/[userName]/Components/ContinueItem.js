@@ -33,7 +33,7 @@ const ContinueItem = ({ itemData, itemType }) => {
         <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6  self-center px-10 md:px-0">
           {
             itemData !== null && itemData !== undefined && itemData.length > 0 ? (
-              itemData.map((item, index) => {
+              itemData?.map((item, index) => {
            
               if (index > 2) return
               return (<div key={index} className=" border border-slate-700 rounded-xl shadow-sm hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col group">

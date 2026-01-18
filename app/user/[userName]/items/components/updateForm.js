@@ -76,7 +76,7 @@ const UpdateForm = ({ item, status, onClose }) => {
                 setNotes(foundItem?.note || "");
                 setpriority(foundItem?.priority || 2)
                 const findedGeneres = []
-                item.genres.map((item) => {
+                item.genres?.map((item) => {
                     findedGeneres.push(item.name)
                 })
 
@@ -95,7 +95,7 @@ const UpdateForm = ({ item, status, onClose }) => {
                 if (Array.isArray(currentEp)) {
                     // Flatten and ensure only numbers go in
                     setSelectedEpisodes(prev => [
-                        ...new Set([...prev, ...currentEp.map(Number)]),
+                        ...new Set([...prev, ...currentEp?.map(Number)]),
                     ]);
                 } else {
                     setSelectedEpisodes(prev =>
@@ -639,7 +639,7 @@ const UpdateForm = ({ item, status, onClose }) => {
                                     </div>
                                 </div>
                                 <div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 p-4 bg-slate-950/40 rounded-2xl border border-slate-800/80 grow max-h-[300px]  overflow-y-auto scrollbar-hide mt-2'>
-                                    {episodes.map((ep) => (
+                                    {episodes?.map((ep) => (
                                         <div key={ep}
                                             className='flex items-center gap-2 md:gap-3 p-2 md:p-2.5 rounded-lg md:rounded-xl bg-slate-900/60 border border-slate-700/30 hover:border-bgsecondary/40 hover:bg-slate-800 transition-all cursor-pointer group'>
                                             <input

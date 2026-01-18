@@ -13,7 +13,7 @@ export const ActivityFeed = (userData) => {
         return new Date(b.updatedAt) - new Date(a.updatedAt);
     });
     animeActivity.slice(0, 4)
-    const mangaActivity = userData.manga.map((item) => ({
+    const mangaActivity = userData.manga?.map((item) => ({
         id: item.mal_id,
         title: item?.title,
         updatedAt: item.updatedAt,
@@ -24,7 +24,7 @@ export const ActivityFeed = (userData) => {
         return new Date(b.updatedAt) - new Date(a.updatedAt);
     });
     mangaActivity.slice(0, 4)
-    const screenshotActivity = userData.screenshots.map((item) => ({
+    const screenshotActivity = userData.screenshots?.map((item) => ({
         id: item.mal_id,
         title: item?.title,
         updatedAt: item.updatedAt,

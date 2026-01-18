@@ -47,7 +47,7 @@ const PrioritySection = ({
 
         }
         setSelectedItem(foundItem);
-        const updatedReceivedItems = ReceivedItem.map(i => {
+        const updatedReceivedItems = ReceivedItem?.map(i => {
             if (i._id === selectedItem._id) {
                 return foundItem;   // replace with updated value
             }
@@ -80,7 +80,7 @@ const PrioritySection = ({
                         ReceivedItem == null || ReceivedItem == undefined ? (
                             <p className="text-center col-span-full">No screenshots in this priority.</p>
                         ) : ReceivedItem.length > 0 ? (
-                            ReceivedItem.map((item, index) => {
+                            ReceivedItem?.map((item, index) => {
                                 if (!expandedSections && index >= 4) return null; // Limit to 4 items
 
                                 return (

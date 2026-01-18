@@ -65,7 +65,7 @@ export default async function ItemsPage({ params, searchParams }) {
                                 </h1>
                                 <div className="flex flex-wrap gap-2 mb-6">
                                     {item.genres && item.genres.length > 0 ? (
-                                        item.genres.map((genre) => <span key={genre.mal_id} className="px-3 py-1 bg-white/10 text-slate-200 text-xs font-medium rounded border border-white/5"> {genre.name} </span>)
+                                        item.genres?.map((genre) => <span key={genre.mal_id} className="px-3 py-1 bg-white/10 text-slate-200 text-xs font-medium rounded border border-white/5"> {genre.name} </span>)
                                     ) : (
                                         "N/A"
                                     )}
@@ -155,7 +155,7 @@ export default async function ItemsPage({ params, searchParams }) {
                                 </h1>
                                 <div className="flex flex-wrap gap-2 mb-6">
                                     {item.genres && item.genres.length > 0 ? (
-                                        item.genres.map((genre) => <span key={genre.mal_id} className="px-3 py-1 bg-white/10 text-slate-200 text-xs font-medium rounded border border-white/5"> {genre.name} </span>)
+                                        item.genres?.map((genre) => <span key={genre.mal_id} className="px-3 py-1 bg-white/10 text-slate-200 text-xs font-medium rounded border border-white/5"> {genre.name} </span>)
                                     ) : (
                                         "N/A"
                                     )}

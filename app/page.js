@@ -25,7 +25,7 @@ export default function Home() {
         mal_Id: item.mal_id,
         title: item.title_english || item.title, // Fallback if english title is null
         description: item.synopsis,
-        Genre: item.genres.map((i) => i.name),
+        Genre: item.genres?.map((i) => i.name),
         Scores: item.score,
         Images: item.images.webp.large_image_url,
         type: getCategory(item.type),
@@ -136,7 +136,7 @@ router.push(`/user/${session.user?.name}`);
             <p className="text-slate-400 mb-12 text-lg">Everything you need to know about getting started.</p>
             <div className="space-y-4">
               {
-                Question.map((item) => (
+                Question?.map((item) => (
 
                   <div key={item.id} className="border border-textcolor/50 rounded-2xl p-0 overflow-hidden group">
                     <button className="flex items-center justify-between w-full p-6 text-left focus:outline-none">

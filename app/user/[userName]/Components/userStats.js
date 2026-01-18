@@ -356,7 +356,7 @@ const UserStats = () => {
                         <h3 className="text-md font-semibold text-textcolor ">Activity Feed</h3>
                         <div className="flex-1 overflow-y-auto space-y-4 pr-2 mt-3 scrollbar-hide">
                             {
-                                activityFeedData.map((activity, index) => (
+                                activityFeedData?.map((activity, index) => (
                                     <div key={index} className="flex items-start gap-3"
                                         onClick={() => {
                                             if (activity.type == "anime" || activity.type == "manga") {

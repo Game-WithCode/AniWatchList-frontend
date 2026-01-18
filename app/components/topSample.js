@@ -38,7 +38,7 @@ const Coursel = ({ slider,itemType }) => {
                 </div>
                 <div ref={scrollRef} className=" scrollbar-hide carousel-container flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scroll-mx-26">
                     {
-                        slider.map((item, index) => (
+                        slider?.map((item, index) => (
                             <div key={item.mal_Id} className="flex-none w-72 snap-start">
 
                                 <div className="relative group rounded-xl overflow-hidden  border border-white shadow-soft h-[400px]">
@@ -51,7 +51,7 @@ const Coursel = ({ slider,itemType }) => {
                                         <div className="flex items-center gap-2 mb-2 text-gray-300 text-xs">
                                             <span className="flex items-center"><span className="material-symbols-outlined text-[14px] mr-1 text-yellow-400">star</span> {item.Scores}</span>
                                             {
-                                                item.Genre.map((i, ind) => {
+                                                item.Genre?.map((i, ind) => {
                                                     if (ind > 2) {
                                                         return
                                                     } else {

@@ -184,9 +184,9 @@ const BrwsrPage = ({ }) => {
           // 2. Split it and Map it
           // Check if genreString exists first to avoid errors if the URL param is missing
           const arrGenreId = genreString
-            ? genreString.split(',').map(id => parseInt(id))
+            ? genreString.split(',')?.map(id => parseInt(id))
             : [];
-          const currentGenre = arrGenreId.map((id) => {
+          const currentGenre = arrGenreId?.map((id) => {
             return allGenreOption.find((item) => item.malId === id);
           })
             .filter((item) => item !== undefined);
@@ -225,7 +225,7 @@ const BrwsrPage = ({ }) => {
         params.delete('genres');
       } else {
         // 2. Extract only the IDs from the array of objects
-        const genreIds = filters.Genre.map((g) => g.malId).join(",");
+        const genreIds = filters.Genre?.map((g) => g.malId).join(",");
 
 
         // 3. Set the correct parameter name ('genres', not 'startYear')
@@ -511,7 +511,7 @@ const BrwsrPage = ({ }) => {
                   defaultValue=""
                 >
                   <option value="" disabled>Select a genre</option>
-                  {allGenreOption.map((genre, index) => (
+                  {allGenreOption?.map((genre, index) => (
                     <option key={"genres" + genre.malId + index} value={genre.malId} >
                       {genre.name}
                     </option>
@@ -561,7 +561,7 @@ const BrwsrPage = ({ }) => {
                 >
                   <option value="" disabled>Select a type</option>
                   {
-                    SelectionType.map((item, index) => (
+                    SelectionType?.map((item, index) => (
                       <option key={"type" + index} value={item.value} >
                         {item.label}
                       </option>
@@ -608,7 +608,7 @@ const BrwsrPage = ({ }) => {
                   <option value="" disabled>Select a Status</option>
 
                   {
-                    airingStatusObj.map((item, index) => (
+                    airingStatusObj?.map((item, index) => (
                       <option key={"Status" + index} value={item.value} >
                         {item.label}
                       </option>
@@ -705,7 +705,7 @@ const BrwsrPage = ({ }) => {
               <label className="block text-sm font-medium text-text-primary mb-2">Order By</label>
               <div className='flex w-full gap-2 flex-wrap'>
                 {
-                  orderListOptions.map((item, index) => (
+                  orderListOptions?.map((item, index) => (
                     <button key={"order" + index}
                       className={
                         filters.orderBy == item.value ? "px-3 py-1.5 rounded-lg text-bgsecondary transition bg-bgsecondary/10 " :
