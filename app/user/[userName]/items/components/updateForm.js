@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { set } from 'mongoose';
 
 
-const updateForm = ({ item, status, onClose }) => {
+const UpdateForm = ({ item, status, onClose }) => {
 
     const [selectedStatus, setSelectedStatus] = useState(
         Array.isArray(status) && status.length === 0
@@ -690,4 +690,4 @@ const updateForm = ({ item, status, onClose }) => {
     )
 }
 
-export default updateForm
+export default UpdateForm

@@ -13,7 +13,7 @@ import { useSession } from "next-auth/react";
 // import { useSession } from "next-auth/react";
 
 
-const signUp = () => {
+const LoginPage = () => {
     const { data: session, status } = useSession();
 
     const router = useRouter();
@@ -151,4 +151,4 @@ const signUp = () => {
     )
 }
 
-export default signUp
+export default LoginPage

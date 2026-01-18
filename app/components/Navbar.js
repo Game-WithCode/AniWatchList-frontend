@@ -44,13 +44,7 @@ const Navbar = () => {
       }
     }
   }
-  useEffect(() => {
-    if (status === "authenticated") {
-console.log(session);
-console.log("UserName from session:", session.user?.name);
-router.push(`/user/${session.user?.name}`);
-    } 
-  }, []);
+ 
   return (
     <>
       {status === "authenticated" ? (

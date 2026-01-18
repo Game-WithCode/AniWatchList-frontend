@@ -114,7 +114,7 @@ const dashboard = async () => {
 
           <div className='w-full m-auto mt-20 mb-10'>
             <h1 className='text-3xl font-bold text-center'>Welcome Back, {session.user.name}  </h1>
-            <p className='text-center text-gray-600 mt-4'>Here's a quick overview of your activity and stats.</p>
+            <p className='text-center text-gray-600 mt-4'>{"Here's a quick overview of your activity and stats."}</p>
             <UserStats/>
           </div>
           {/* continue Anime  */}

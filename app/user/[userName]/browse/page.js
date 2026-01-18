@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 import { allGenres } from '@/lib/hooks/Allgenre';
 import PaginationButtons from './components/PaginationButton.js';
 import Link from 'next/link'
-const page = ({ }) => {
+const BrowsePage = ({ }) => {
   const searchParams = useSearchParams()
   const router = useRouter();
   const pathname = usePathname();
@@ -740,4 +740,4 @@ const page = ({ }) => {
   )
 }
 
-export default page
+export default BrowsePage

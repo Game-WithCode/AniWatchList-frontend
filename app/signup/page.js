@@ -9,7 +9,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-const signUp = () => {
+const SignUpPage = () => {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [userRegisted, setuserRegisted] = useState(true)
@@ -225,4 +225,4 @@ const signUp = () => {
     )
 }
 
-export default signUp
+export default SignUpPage
