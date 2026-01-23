@@ -466,7 +466,7 @@ const UpdateForm = ({ item, status, onClose }) => {
                                     </select>
                                     <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 text-lg">expand_more</span>
                                 </div>
-                                <button className="flex items-center justify-center h-[42px] md:h-12 w-[42px] md:w-12 rounded-xl border border-slate-700/50 text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-all shrink-0"
+                                <button className="flex items-center justify-center h-10.5 md:h-12 w-10.5 md:w-12 rounded-xl border border-slate-700/50 text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-all shrink-0"
                                     onClick={() => setIsFavorite(!isFavorite)}
                                 >
                                     <span className={`material-symbols-outlined text-bgsecondary ${isFavorite ? '[font-variation-settings:"FILL"_1]' : ''} text-xl`} >
@@ -618,7 +618,7 @@ const UpdateForm = ({ item, status, onClose }) => {
                                     ></textarea>
                                 </div>
                             </div>
-                            <div className='lg:col-span-2 xl:col-span-1 space-y-4 flex flex-col min-h-[300px] lg:h-full'>
+                            <div className='lg:col-span-2 xl:col-span-1 space-y-4 flex flex-col min-h-75 lg:h-full'>
                                 <div className="flex justify-between items-center mb-1">
 
                                     <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.15em] ml-1">{itemType === "anime" ? "Episodes" : "Chapters"} Progress</label>
@@ -638,7 +638,7 @@ const UpdateForm = ({ item, status, onClose }) => {
                                         </label>
                                     </div>
                                 </div>
-                                <div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 p-4 bg-slate-950/40 rounded-2xl border border-slate-800/80 grow max-h-[300px]  overflow-y-auto scrollbar-hide mt-2'>
+                                <div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 p-4 bg-slate-950/40 rounded-2xl border border-slate-800/80 grow max-h-75  overflow-y-auto scrollbar-hide mt-2'>
                                     {episodes?.map((ep) => (
                                         <div key={ep}
                                             className='flex items-center gap-2 md:gap-3 p-2 md:p-2.5 rounded-lg md:rounded-xl bg-slate-900/60 border border-slate-700/30 hover:border-bgsecondary/40 hover:bg-slate-800 transition-all cursor-pointer group'>

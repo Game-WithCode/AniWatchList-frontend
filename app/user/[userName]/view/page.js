@@ -329,7 +329,7 @@ const ScreenshotViewer = () => {
     ${isMobileFilterOpen ? "fixed inset-0 md:inset-1/2 z-50 md:w-1/2  h-fit md:top-1/5 overflow-y-auto rounded-none" : "hidden"}
 
     // 2. Desktop State (Always visible sidebar)
-    lg:block lg:w-1/4 lg:sticky lg:top-20 lg:h-fit lg:max-h-[800px] lg:rounded-lg 
+    lg:block lg:w-1/4 lg:sticky lg:top-20 lg:h-fit lg:max-h-200 lg:rounded-lg 
     
     // 3. Shared Styling (Colors, shadows)
     bg-[#1F2937] p-6 shadow-lg scrollbar-hide overflow-auto

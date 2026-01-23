@@ -120,8 +120,8 @@ const Details = ({ selectedItem, onClose, isUpadated }) => {
    
       <div className="fixed inset-0 z-60 flex items-center justify-center p-4 md:p-6 bg-black/90 backdrop-blur-md">
         <div className="bg-background-deep w-full max-w-5xl rounded-2xl md:rounded-3xl overflow-hidden border border-slate-800 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] flex flex-col md:flex-row max-h-[95vh]">
-          <div className="relative w-full md:w-5/12 lg:w-2/5 bg-slate-950/50 p-6 md:p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-slate-800/50">
-            <div className="overflow-hidden min-h-full flex-1 bg-gray-100 dark:bg-gray-800 p-6 flex items-center justify-center w-full h-full relative rounded-lg">
+          <div className="relative h-120 md:h-auto  w-full md:w-5/12 lg:w-2/5 bg-slate-950/50 p-6 md:p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-slate-800/50">
+            <div className="overflow-hidden  flex-1 bg-gray-100 dark:bg-gray-800 p-6 flex items-center justify-center w-full md:h-full relative rounded-lg">
 
               <TransformWrapper
                 ref={ref}
@@ -160,11 +160,12 @@ const Details = ({ selectedItem, onClose, isUpadated }) => {
               <div className="absolute inset-0 bg-linear-to-t from-background-deep/90 via-transparent to-transparent opacity-60 pointer-events-none"></div>
             </div>
           </div>
-          <div className="flex-1 flex flex-col relative bg-background-deep w-full overflow-hidden">
-            <button className="absolute top-4 right-4 z-20 p-2 rounded-full text-slate-500 hover:text-white hover:bg-white/5 transition-colors" onClick={() => onClose()}>
+
+          <div className="flex-1 flex flex-col relative bg-background-deep w-full overflow-hidden ">
+            <button className="sticky top-4 self-end mr-4 z-50 p-2 rounded-full text-slate-500 hover:text-white hover:bg-white/5 transition-colors" onClick={() => onClose()}>
               <span className="material-symbols-outlined">close</span>
             </button>
-            <div className="p-6 md:p-8 lg:p-10 overflow-y-auto custom-scrollbar h-full">
+            <div className="p-6 md:p-8 lg:p-10 lg:pt-2 overflow-y-auto custom-scrollbar h-full scrollbar-hide">
               <div className="flex flex-col gap-6 mb-8 border-b border-slate-800/50 pb-6">
                 <div className="flex justify-between items-start">
                   <div className="space-y-3">
