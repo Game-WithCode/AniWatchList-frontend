@@ -244,7 +244,7 @@ const Details = ({ selectedItem, onClose, isUpadated }) => {
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
                     <span className="text-slate-500 font-semibold w-24">Uploaded At:</span>
-                    <span className="text-slate-400">{new Date(selectedItem.uploadedAt).toLocaleString()}</span>
+                    <span className="text-slate-400">{new Date(selectedItem.createAt).toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-slate-500 font-semibold w-24">Category:</span>
