@@ -30,7 +30,7 @@ const Details = ({ selectedItem, onClose, isUpadated }) => {
       // Initialize DetailsPacket with selectedItem data
       foundItem.forEach((item) => {
         if (item._id === selectedItem._id) {
-          console.log("Found Item:", item);
+        
           setDetailsPacket({
             _id: item._id || '',
             title: item.title || '',
@@ -84,7 +84,7 @@ const Details = ({ selectedItem, onClose, isUpadated }) => {
         // Optionally close the details view after saving
         onClose();
       } else {
-        console.error("Error saving details:", data);
+        console.error("Error saving details:", error);
         toast.error("❌ Something went wrong. Try again!");
       }
     } catch (error) {
