@@ -1,24 +1,8 @@
-// import React from 'react'
-
-// export default function ContinueBtn({ item }) {
-//   return (
-//     <>
-//       <div className='flex justify-center mb-20'>
-//         {/* add button */}
-//         <div>
-//           <button className="w-fit bg-[#E8E867]  text-black font-bold py-2 px-8 rounded-lg cursor-pointer hover:bg-[#dbdb49]   hover:scale-110  " >Add  to Continue</button>
-
-//         </div>
-//       </div>
-//     </>
-//   )
-// }
 
 "use client";
 import React, { useState, useEffect, use } from "react";
 import { ChevronDown, ChevronUp, Plus, Heart } from "lucide-react";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from 'react-toastify';
 import { ItemPresentCheck } from "@/lib/hooks/itemPresent"
 import { itemfind } from "@/lib/hooks/itemfind";
 import UpdateForm from "./updateForm";
@@ -110,15 +94,7 @@ export default function ContinueBtn({ item }) {
   }
   return (
     <>
-      <ToastContainer
-        position="top-right"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        pauseOnHover
-        theme="colored"
-      />
+
       {canAppear && (
         <UpdateForm
           item={item}

@@ -1,7 +1,6 @@
 "use client";
 import React from 'react'
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from 'react-toastify';
 export default function FavoriteBtn  ({ item })  {
 console.log('SGRFEG',item)
 
@@ -49,15 +48,6 @@ console.log('SGRFEG',item)
 
     return (
         <>
-         <ToastContainer
-                        position="top-right"
-                        autoClose={2000}
-                        hideProgressBar={false}
-                        newestOnTop={false}
-                        closeOnClick
-                        pauseOnHover
-                        theme="colored"
-                    />
             <div className='container flex justify-end'>
                 <div className='flex items-center'>
                     <span className='font-semibold'>Add to Favorite</span>

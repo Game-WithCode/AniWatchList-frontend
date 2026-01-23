@@ -4,6 +4,8 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Providers from "./components/Provider";
 import { Suspense } from 'react';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Script from 'next/script'; // Add this to your imports
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +37,7 @@ export default function RootLayout({ children }) {
           <Suspense fallback={<div>Loading...</div>}>
           <Navbar />
             {children}
+            <ToastContainer position="top-right" autoClose={2000} theme="colored" />
           <Footer />
           </Suspense>
         </Providers>

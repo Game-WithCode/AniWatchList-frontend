@@ -5,8 +5,7 @@ import { useForm } from "react-hook-form"
 import { signIn } from "next-auth/react";
 import { useState,useEffect } from 'react';
 import { useFormState } from 'react-dom';
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from 'react-toastify';
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 const SignUpPage = () => {
@@ -61,15 +60,6 @@ const SignUpPage = () => {
     }
     return (
         <>
-            <ToastContainer
-                position="top-right"
-                autoClose={2000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                pauseOnHover
-                theme="colored"
-            />
 
             <main className="grow w-full max-w-[1600px] mx-auto p-4 md:p-8 lg:p-12 flex flex-col lg:flex-row gap-8 lg:gap-0 items-stretch relative">
                 <div className="flex-1 relative rounded-b-4xl lg:rounded-b-none lg:rounded-br-4xl lg:rounded-r-4xl overflow-hidden min-h-[300px] lg:min-h-[600px] z-10 transition-all duration-500">

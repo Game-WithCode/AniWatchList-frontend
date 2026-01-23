@@ -1,8 +1,7 @@
 "use client";
 import { set } from "mongoose";
 import { use, useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from 'react-toastify';
 import { useForm } from "react-hook-form"
 import { useFormState } from 'react-dom';
 
@@ -123,16 +122,7 @@ export default function UploadBox() {
 
     return (
         <>
-            <ToastContainer
-                position="top-right"
-                autoClose={2000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                pauseOnHover
-                theme="colored"
-            />
-
+         
 
 
 

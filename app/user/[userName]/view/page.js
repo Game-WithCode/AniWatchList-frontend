@@ -6,8 +6,7 @@ import { useState, useEffect } from 'react'
 import PrioritySection from './components/prioritysection'
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from 'react-toastify';
 
 const ScreenshotViewer = () => {
     const router = useRouter()

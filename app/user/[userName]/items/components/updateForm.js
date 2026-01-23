@@ -3,8 +3,7 @@ import React, { use } from 'react'
 import { ChevronDown, ChevronUp, X, Heart } from "lucide-react";
 import { useState, useEffect } from 'react';
 import { itemfind } from '@/lib/hooks/itemfind';
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from 'react-toastify';
 import { set } from 'mongoose';
 
 
@@ -81,7 +80,7 @@ const UpdateForm = ({ item, status, onClose }) => {
                 })
 
                 setgenre(findedGeneres)
-          
+
                 if (itemType === "manga") {
                     const currentCh = foundItem?.chaptersProgress || [];
                     setSelectedEpisodes(currentCh);
@@ -103,7 +102,7 @@ const UpdateForm = ({ item, status, onClose }) => {
                     );
                 }
 
-       
+
 
 
             } catch (err) {
@@ -113,6 +112,7 @@ const UpdateForm = ({ item, status, onClose }) => {
         fetchAnime();
     }, []);
     let handlerSave = async (e) => {
+        toast.dismiss();
         if (itemType === "anime") {
             const EPCount = Array.from({ length: EPprogress }, (_, i) => i + 1);
             const updatedEpisodes = Array.from(new Set([...selectedEpisodes, ...EPCount]))
@@ -129,7 +129,7 @@ const UpdateForm = ({ item, status, onClose }) => {
 
             const dbitem = itemPresent?.watchlist?.[itemType] ?? [];
             const isItemAlreadyAdded = dbitem.some(i => i.mal_id === item.mal_id);
-      
+
             if (!isItemAlreadyAdded) {
                 const res = await fetch("/api/watchlist/add", {
                     method: "POST",
@@ -154,7 +154,9 @@ const UpdateForm = ({ item, status, onClose }) => {
                 });
                 const result = await res.json();
                 if (res.status === 201) {
-                    toast.success(`${categoryType} added successfully!`);
+                    toast.success(`${categoryType} added successfully!`, {
+                        toastId: 'save-success'
+                    });
                     onClose();
                 } else if (res.status === 409) {
                     toast.error("item is not added!");
@@ -171,17 +173,17 @@ const UpdateForm = ({ item, status, onClose }) => {
                 let localRepeatCount = repeatCount;
                 let findUserStatus = dbitem.find(i => i.mal_id === item.mal_id);
                 if (localSelectedStatus === "Rewatch" && findUserStatus.UserStatus !== "Rewatch") {
-              
+
                     updatedEpisodes.length = 0;
                 }
                 if (updatedEpisodes.length === item.episodes) {
                     if (selectedStatus === "Rewatch") {
                         localRepeatCount += 1;
                     }
-       
+
                     localSelectedStatus = "Completed";
                     setSelectedStatus(localSelectedStatus);
-         
+
                     // userStatus is rewatch then increase the repeat number
                     if (selectedStatus !== "Completed") {
                         toast.success(`Congrat you completed the series!`);
@@ -276,7 +278,7 @@ const UpdateForm = ({ item, status, onClose }) => {
             setSelectedEpisodes(EPCount);
         } else {
             const CHCount = Array.from({ length: Progress }, (_, i) => i + 1);
-       
+
             setSelectedEpisodes(CHCount);
         }
     }
@@ -337,32 +339,32 @@ const UpdateForm = ({ item, status, onClose }) => {
                 toast.success(`Item updated successfully!`);
                 onClose()
             } else {
-          
+
                 toast.error("❌ Something went wrong. Try again!");
             }
         } else {
             let localSelectedStatus = selectedStatus;
-   
+
             let localRepeatCount = repeatCount;
             let localVolumesProgress = VOLprogress;
             let findUserStatus = dbitem.find(i => i.mal_id === item.mal_id);
             if (localSelectedStatus === "Rewatch" && findUserStatus.UserStatus !== "Rewatch") {
-              
+
                 updatedEpisodes.length = 0;
                 localVolumesProgress = 0;
             }
-        
+
             if (updatedEpisodes.length === item.chapters) {
                 if (selectedStatus === "Rewatch") {
                     localRepeatCount += 1;
                 }
 
-              
+
                 localSelectedStatus = "Completed";
                 localVolumesProgress = item.volumes;
                 setSelectedStatus(localSelectedStatus);
                 // userStatus is rewatch then increase the repeat number
-                
+
                 if (selectedStatus !== "Completed") {
                     toast.success(`Congrat you completed the series!`);
                 }
@@ -395,7 +397,7 @@ const UpdateForm = ({ item, status, onClose }) => {
                 toast.success(`Item Manga updated successfully!`);
                 onClose()
             } else {
-            
+
                 toast.error("❌ Something went wrong. Try again!");
             }
         }
@@ -482,43 +484,6 @@ const UpdateForm = ({ item, status, onClose }) => {
                         </div>
                     </div>
 
-                    {/* <div className="saveContainer flex flex-col sm:flex-row justify-between items-center gap-4 p-4 relative">
-                        <div className="relative w-full sm:w-auto flex items-center gap-4">
-                            <select
-                                value={selectedStatus}
-                                onChange={(e) => setSelectedStatus(e.target.value)}
-                                className="w-full sm:w-auto appearance-none bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#26a69a] focus:border-[#26a69a]">
-                                <option value="Continue">Set As Continue </option>
-                                <option value="Future">Set As Future </option>
-                                <option value="Completed">Completed</option>
-                                <option value="Paused">Paused</option>
-                                <option value="Dropped">Dropped</option>
-                                <option value="Planning">Plan to Watch</option>
-                                <option value="Rewatch">Plan to Rewatch</option>
-                            </select>
-                            <ChevronDown className="absolute  top-1/2 -translate-y-1/2 translate-x-30 text-slate-500 pointer-events-none" />
-                            <div className="flex justify-center p-2 border-2 border-[#bdb9b9] rounded-lg shadow-2xl gap-1.5 hover:scale-105 hover:bg-[#f5fafa] hover:text-[#239BA7] hover:border-[#bdb9b9] transition-all duration-300 h-11" onClick={() => setIsFavorite(!isFavorite)}>{isFavorite ? <Heart fill="red" strokeWidth={0} /> : <Heart />} </div>
-                            <div className='relative'>
-                                <select
-                                    value={priority}
-                                    onChange={(e) => setpriority(e.target.value)}
-                                    className="w-full sm:w-auto appearance-none bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#26a69a] focus:border-[#26a69a]">
-                                    <option value={3}>High priority</option>
-                                    <option value={2}>Medium priority</option>
-                                    <option value={1}>Low Priority</option>
-
-                                </select>
-                                <span className="material-symbols-outlined absolute top-1/2 -translate-y-1/2 right-2"
-                                >
-                                    keyboard_arrow_up
-                                </span>
-                            </div>
-                        </div>
-                        <div>
-                            <button className="bg-[#26a69a] text-white font-semibold py-2 px-6 rounded-md shadow-sm hover:opacity-90 transition-opacity w-full sm:w-auto" onClick={handlerSave}>Save</button>
-                        </div>
-                    </div> */}
-
                     <div className='p-5 md:p-8 overflow-y-auto scrollbar-hide grow'>
                         <div className="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-2 gap-8 lg:gap-10">
                             {/* this is for details and episode selection */}
@@ -570,11 +535,11 @@ const UpdateForm = ({ item, status, onClose }) => {
                                 </div>
                                 {itemType === "manga" && (<div className='grid grid-cols-1 sm:grid-cols-3 gap-5'>
                                     <div className='space-y-2.5'>
-                                    <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.15em] block ml-1">No of VolumesProgress</label>
-                                    <div className="flex h-11">
-                                        <span className="bg-bgsecondary/10 text-bgsecondary border border-bgsecondary/20 border-r-0 px-2.5 text-[9px] font-bold rounded-l-xl flex items-center uppercase">{item.volumes || 'N/A'}</span>
-                                          <input type="number" className="glass-input rounded-r-xl w-full text-center py-2 font-display text-lg font-semibold" value={VOLprogress} onChange={(e) => { setVOLprogress(e.target.value < 0 ? 0 : e.target.value > item.volumes ? item.volumes : e.target.value) }} />
-                                    </div>
+                                        <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.15em] block ml-1">No of VolumesProgress</label>
+                                        <div className="flex h-11">
+                                            <span className="bg-bgsecondary/10 text-bgsecondary border border-bgsecondary/20 border-r-0 px-2.5 text-[9px] font-bold rounded-l-xl flex items-center uppercase">{item.volumes || 'N/A'}</span>
+                                            <input type="number" className="glass-input rounded-r-xl w-full text-center py-2 font-display text-lg font-semibold" value={VOLprogress} onChange={(e) => { setVOLprogress(e.target.value < 0 ? 0 : e.target.value > item.volumes ? item.volumes : e.target.value) }} />
+                                        </div>
                                     </div>
                                 </div>)}
 
@@ -585,7 +550,7 @@ const UpdateForm = ({ item, status, onClose }) => {
                                             startDate
                                                 ? new Date(startDate).toISOString().split("T")[0]
                                                 : ""
-                                        }  />
+                                        } readOnly />
 
                                     </div>
                                     <div className='space-y-2.5'>
@@ -594,7 +559,7 @@ const UpdateForm = ({ item, status, onClose }) => {
                                             finishDate
                                                 ? new Date(finishDate).toISOString().split("T")[0]
                                                 : ""
-                                        } />
+                                        } readOnly />
                                     </div>
                                     <div className='space-y-2.5'>
                                         <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.15em] block ml-1">Last Update</label>
@@ -602,7 +567,7 @@ const UpdateForm = ({ item, status, onClose }) => {
                                             updatedDate
                                                 ? new Date(updatedDate).toISOString().split("T")[0]
                                                 : ""
-                                        }  disabled />
+                                        } disabled />
 
                                     </div>
                                 </div>

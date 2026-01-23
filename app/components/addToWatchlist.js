@@ -1,7 +1,6 @@
 "use client";
 import React from 'react'
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from 'react-toastify';
 import { itemfind } from "@/lib/hooks/itemfind"
 import { LocateFixed } from 'lucide-react';
 
@@ -33,43 +32,6 @@ const AddToWatchlist = ({ item, addType }) => {
             toast.error("❌ Something went wrong. Try again!");
         }
     }
-    // let handlerComplete = async (e) => {
-    //     categoryType = item.type === "Movie"
-    //         ? "movies"
-    //         : item.type === "TV"
-    //             ? "anime"
-    //             : item.type === "Manga"
-    //                 ? "manga" : item.type === "OVA"
-    //                     ? "anime"
-    //                     : item.type === "ONA"
-    //                         ? "anime"
-    //                         : item.type === "Special"
-    //                             ? "anime" : item.type === "Manhwa"
-    //                                 ? "manga"
-    //                                 : "anime";
-    //     e.preventDefault();
-    //     const res = await fetch("/api/watchlist/add", {
-    //         method: "POST",
-    //         headers: { "Content-Type": "application/json" },
-    //         body: JSON.stringify({
-    //             mal_id: item.mal_id,
-    //             title: item.title,
-    //             image: item.images.jpg.image_url,
-    //             type: addType,
-    //             category: categoryType,
-    //         }),
-    //     });
-    //     const result = await res.json();
-    //     if (res.status === 201) {
-    //         toast.success(`${categoryType} added successfully!`);
-    //     } else if (res.status === 409) {
-    //         toast.error("item is not added!");
-    //     } else if (res.status === 200) {
-    //         toast.info("item already added!");
-    //     } else {
-    //         toast.error("❌ Something went wrong. Try again!");
-    //     }
-    // }
     let completeHandler = async () => {
         const type = item.type === "Movie"
             ? "anime"
@@ -121,15 +83,7 @@ const AddToWatchlist = ({ item, addType }) => {
     }
     return (
         <>
-            <ToastContainer
-                position="top-right"
-                autoClose={2000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                pauseOnHover
-                theme="colored"
-            />
+          
             <div className="actionButtons mx-auto mb-6">
 
                 <div className=" container flex flex-col justify-center items-center gap-5 mx-auto">

@@ -2,8 +2,7 @@ import React from 'react'
 import { useState, useEffect } from 'react';
 import Details from './details';
 import { itemfind } from '@/lib/hooks/itemfind';
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from 'react-toastify';
 const PrioritySection = ({
     item
 }) => {
@@ -61,15 +60,7 @@ const PrioritySection = ({
 
     return (
         <>
-            <ToastContainer
-                position="top-right"
-                autoClose={2000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                pauseOnHover
-                theme="colored"
-            />
+          
             {
                 canshow ? <Details selectedItem={selectedItem} onClose={() => setCanshow(false)} isUpadated={() => upadating()} /> : null
             }

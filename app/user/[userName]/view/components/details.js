@@ -1,20 +1,16 @@
 import React, { use } from 'react'
 import { useRef, useState, useEffect } from "react";
-import Zoom from 'react-medium-image-zoom'
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import 'react-medium-image-zoom/dist/styles.css'
 import { itemfind } from '@/lib/hooks/itemfind';
-import { set } from 'mongoose';
-import { toast, ToastContainer } from "react-toastify";
-import { Heart } from "lucide-react";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from 'react-toastify';
 const Details = ({ selectedItem, onClose, isUpadated }) => {
   const [DetailsPacket, setDetailsPacket] = useState({
     _id: '',
     title: '',
     description: '',
     priority: 0,
-    userStatus: "continue",
+    userStatus: "",
     category: '',
     userRating: 0,
     rewatches: 0,
@@ -34,12 +30,13 @@ const Details = ({ selectedItem, onClose, isUpadated }) => {
       // Initialize DetailsPacket with selectedItem data
       foundItem.forEach((item) => {
         if (item._id === selectedItem._id) {
+          console.log("Found Item:", item);
           setDetailsPacket({
             _id: item._id || '',
             title: item.title || '',
             description: item.description || '',
             priority: item.priority || 1,
-            userStatus: item.userStatus || "planning",
+            userStatus: item.UserStatus || "planning",
             category: item.category || '',
             userRating: item.userRating || 0,
             rewatches: item.rewatches || 0,
@@ -55,7 +52,7 @@ const Details = ({ selectedItem, onClose, isUpadated }) => {
   }, []);
 
   const handleDoubleClick = () => {
-  
+
     const api = ref.current;
 
     if (!api) return;
@@ -72,7 +69,7 @@ const Details = ({ selectedItem, onClose, isUpadated }) => {
     }
   };
   let saveChangeHandler = async () => {
-   
+
     try {
       const res = await fetch('/api/watchlist/updateScreenshot', {
         method: "POST",
@@ -82,7 +79,7 @@ const Details = ({ selectedItem, onClose, isUpadated }) => {
       const data = await res.json();
       if (res.ok) {
         toast.success(`Item Updated successfully!`);
-       
+
         isUpadated()
         // Optionally close the details view after saving
         onClose();
@@ -107,7 +104,7 @@ const Details = ({ selectedItem, onClose, isUpadated }) => {
     });
     const result = await res.json();
     if (res.status === 200) {
-      toast.success(`Item deleted successfully!`);
+      toast.success(`Item Updated successfully!`, { toastId: 'success-update' });
       onClose();
       isUpadated();
     } else {
@@ -117,10 +114,10 @@ const Details = ({ selectedItem, onClose, isUpadated }) => {
 
   return (
     <>
-   
+
       <div className="fixed inset-0 z-60 flex items-center justify-center p-4 md:p-6 bg-black/90 backdrop-blur-md">
         <div className="bg-background-deep w-full max-w-5xl rounded-2xl md:rounded-3xl overflow-hidden border border-slate-800 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] flex flex-col md:flex-row max-h-[95vh]">
-          <div className="relative h-120 md:h-auto  w-full md:w-5/12 lg:w-2/5 bg-slate-950/50 p-6 md:p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-slate-800/50">
+          <div className="relative h-110 md:h-auto  w-full md:w-5/12 lg:w-2/5 bg-slate-950/50 p-6 md:p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-slate-800/50">
             <div className="overflow-hidden  flex-1 bg-gray-100 dark:bg-gray-800 p-6 flex items-center justify-center w-full md:h-full relative rounded-lg">
 
               <TransformWrapper
@@ -366,19 +363,19 @@ const Details = ({ selectedItem, onClose, isUpadated }) => {
               <div className="space-y-2 mb-8">
                 <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.15em] ml-1">Notes</label>
                 {/* <textarea className="glass-input rounded-2xl w-full p-4 resize-none text-sm leading-relaxed min-h-[120px]" placeholder="Add your notes here..."></textarea> */}
-                 <textarea
-                className='glass-input rounded-2xl w-full p-4 resize-none text-sm leading-relaxed min-h-[120px]'
-                placeholder='Add your notes here...'
-                id="notes"
-                value={DetailsPacket.notes}
-                onChange={(e) => setDetailsPacket(prev => ({ ...prev, notes: e.target.value }))}
-              ></textarea>
+                <textarea
+                  className='glass-input rounded-2xl w-full p-4 resize-none text-sm leading-relaxed min-h-[120px]'
+                  placeholder='Add your notes here...'
+                  id="notes"
+                  value={DetailsPacket.notes}
+                  onChange={(e) => setDetailsPacket(prev => ({ ...prev, notes: e.target.value }))}
+                ></textarea>
               </div>
               <div className="flex items-center justify-between pt-6 border-t border-slate-800/50 mt-auto">
                 <button className="px-6 py-2.5 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-600 hover:text-white border border-red-500/20 hover:border-red-600 transition-all text-sm font-bold shadow-lg shadow-red-500/5 active:scale-95" onClick={() => handlerDelete()}>
                   Delete
                 </button>
-                <button className="px-8 py-2.5 rounded-xl bg-bgsecondary text-slate-900 hover:bg-teal-400 transition-all text-sm font-bold shadow-lg shadow-bgsecondary/20 active:scale-95"  onClick={() => saveChangeHandler()}>
+                <button className="px-8 py-2.5 rounded-xl bg-bgsecondary text-slate-900 hover:bg-teal-400 transition-all text-sm font-bold shadow-lg shadow-bgsecondary/20 active:scale-95" onClick={() => saveChangeHandler()}>
                   Save Changes
                 </button>
               </div>
@@ -389,7 +386,7 @@ const Details = ({ selectedItem, onClose, isUpadated }) => {
 
 
 
-    
+
     </>
   )
 }
