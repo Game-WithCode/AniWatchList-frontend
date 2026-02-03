@@ -251,15 +251,19 @@ export default function AddedPage({ params }) {
 
 
     if (loading) {
-        return <p>Loading...</p>;
+        return(
+            <div className="container mx-auto flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-bgsecondary"></div>
+            </div>
+        ) 
     }
 
 
     return (
         <>
             <div className="container mx-auto p-4 text-center">
-                <h1 className="text-3xl font-bold mb-4">Your Added Anime</h1>
-                <p>This is the user’s added anime page.</p>
+                <h1 className="text-3xl font-bold mb-4">Your Added {searchType ? searchType.charAt(0).toUpperCase() + searchType.slice(1) : ""}</h1>
+                <p>This is the user’s added {searchType ? searchType : "items"} page.</p>
             </div>
             {/* let add filter button for small screen so on click it will open modal for filter options */}
             <div className="lg:hidden container mx-auto px-4 flex justify-end">

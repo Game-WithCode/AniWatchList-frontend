@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { allGenres } from '@/lib/hooks/Allgenre';
 import PaginationButtons from "@/app/components/PaginationButton";
 import Link from 'next/link'
+import { set } from 'mongoose';
 
 // import SearchDetail from './SearchDetails'
 const Search = () => {
@@ -24,6 +25,8 @@ const Search = () => {
   const [airingStatusObj, setairingStatusObj] = useState([])
   const [isOpen, setisOpen] = useState(false)
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  //this variable to show that anime or manga is loading 
+  const [isLoading, setIsLoading] = useState(false);
   const animeTypes = [
     { label: "TV", value: "tv" },
     { label: "Movie", value: "movie" },
@@ -78,6 +81,7 @@ const Search = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const queryParams = {
           query: search,
           SearchTypeCategory: searchType,
@@ -92,6 +96,7 @@ const Search = () => {
         };
         const item = await Browse("Search", queryParams);
         setitemList(item)
+        setIsLoading(false);
         //set the filter according to url
         const params = new URLSearchParams(searchParams.toString());
         //First for year
@@ -435,7 +440,11 @@ const Search = () => {
           </span>
         </button>
       </div>
-
+      {isLoading && (
+        <div className="container mx-auto flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-bgsecondary"></div>
+        </div>
+      )}
       <div className='container w-full flex  mx-auto mt-10 gap-10 justify-center'>
         <div className='flex flex-col max-w-2/3'>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 ">
@@ -443,7 +452,9 @@ const Search = () => {
 
             {itemList?.data?.map((item, index) => {
               const type = (item.type === "TV" || item.type === "Movie" || item.type === "OVA" || item.type === "ONA" || item.type === "Special") ? "anime" : "manga";
-
+              if (isLoading) {
+                return null; // Skip rendering items while loading
+              }
 
               return (
                 <div key={`${item.mal_id}-${index
@@ -800,7 +811,7 @@ const Search = () => {
           </div>
         </section >
       </div>
-     
+
     </>
   )
 }

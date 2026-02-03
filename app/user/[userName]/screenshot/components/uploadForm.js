@@ -130,23 +130,23 @@ export default function UploadBox() {
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
                     <div className="max-w-4xl mx-auto">
                         <div className="text-center mb-10">
-                            <h1 className="text-3xl md:text-4xl font-bold text-bgsecondary dark:text-white mb-2">Add Screenshot to Your List</h1>
-                            <p className="text-slate-100 dark:text-slate-100">Upload a screenshot and add details to keep your watchlist organized.</p>
+                            <h1 className="text-3xl md:text-4xl font-bold text-bgsecondary  mb-2">Add Screenshot to Your List</h1>
+                            <p className="text-slate-100 ">Upload a screenshot and add details to keep your watchlist organized.</p>
                         </div>
                         <div className="">
                             <form action="#" className="space-y-6 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start" method="POST" onSubmit={handleSubmit(onSubmit)}>
-                                <div className="bg-white dark:bg-card-dark rounded-lg p-6 sm:p-8 shadow-lg dark:shadow-2xl border border-slate-200 dark:border-slate-700/50">
+                                <div className="bg-white rounded-lg p-6 sm:p-8 shadow-lg  border border-slate-200 ">
 
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2" htmlFor="screenshot-title">Screenshot Title</label>
+                                        <label className="block text-sm font-medium text-slate-700  mb-2" htmlFor="screenshot-title">Screenshot Title</label>
                                         <input
                                             className="block w-full rounded-lg 
-                                            border border-slate-300 dark:border-slate-600
-                                          bg-[#F8F9FC] dark:bg-slate-700/50 shadow-sm 
+                                            border border-slate-300
+                                          bg-[#F8F9FC] 
                                             focus:outline-none 
                                             focus:ring-2 focus:ring-bgsecondary 
                                           focus:border-bgsecondary
-                                          text-slate-800 dark:text-slate-200
+                                          text-slate-800 
                                             p-2
                                             sm:text-sm"
                                             id="screenshot-title" name="screenshot-title" placeholder="e.g. Favorite fight scene" type="text"
@@ -157,15 +157,15 @@ export default function UploadBox() {
                                         {errors.screenshotTitle && <p className='text-red-500 text-sm mt-1'>{errors.screenshotTitle.message}</p>}
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2" htmlFor="category">Category</label>
+                                        <label className="block text-sm font-medium text-slate-700 mb-2" htmlFor="category">Category</label>
                                         <select
                                             className="block w-full rounded-lg 
-                                            border border-slate-300 dark:border-slate-600
-                                          bg-[#F8F9FC] dark:bg-slate-700/50 shadow-sm 
+                                            border border-slate-300 
+                                          bg-[#F8F9FC] 
                                             focus:outline-none 
                                             focus:ring-2 focus:ring-bgsecondary 
                                           focus:border-bgsecondary
-                                          text-slate-800 dark:text-slate-200
+                                          text-slate-800 
                                             p-2
                                             sm:text-sm"
                                             id="category" name="category"
@@ -180,15 +180,15 @@ export default function UploadBox() {
                                         {errors.category && <p className='text-red-500 text-sm mt-1'>{errors.category.message}</p>}
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2" htmlFor="description">Notes / Context <span className="text-slate-400 dark:text-slate-500">(Optional)</span></label>
+                                        <label className="block text-sm font-medium text-slate-700  mb-2" htmlFor="description">Notes / Context <span className="text-slate-400 ">(Optional)</span></label>
                                         <textarea
                                             className="block w-full rounded-lg 
-                                            border border-slate-300 dark:border-slate-600
-                                          bg-[#F8F9FC] dark:bg-slate-700/50 shadow-sm 
+                                            border border-slate-300 
+                                          bg-[#F8F9FC]  shadow-sm 
                                             focus:outline-none 
                                             focus:ring-2 focus:ring-bgsecondary 
                                           focus:border-bgsecondary
-                                          text-slate-800 dark:text-slate-200
+                                          text-slate-800 
                                             p-2
                                             sm:text-sm"
                                             id="description" name="description" placeholder="Why you saved this screenshot..." rows="3"
@@ -199,48 +199,48 @@ export default function UploadBox() {
                                         ></textarea>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Set Priority</label>
+                                        <label className="block text-sm font-medium text-slate-700  mb-3">Set Priority</label>
 
                                         <div className="space-y-3">
                                             {/* Option 1: High Priority (Value: 2) */}
-                                            <label className="flex items-center p-4 rounded-lg border border-slate-300 dark:border-slate-600 has-checked:border-bgsecondary has-checked:bg-bgsecondary/5 dark:has-checked:bg-bgsecondary/10 cursor-pointer transition-all duration-200">
+                                            <label className="flex items-center p-4 rounded-lg border border-slate-300  has-checked:border-bgsecondary has-checked:bg-bgsecondary/5 0 cursor-pointer transition-all duration-200">
                                                 <span className="material-symbols-outlined text-red-500 mr-3">priority_high</span>
-                                                <span className="grow font-medium text-slate-800 dark:text-slate-200">High Priority</span>
+                                                <span className="grow font-medium text-slate-800 ">High Priority</span>
 
                                                 <input
                                                     {...register("priority", { required: "Please select a priority option" })}
                                                     type="radio"
                                                     value="3"
-                                                    className="h-4 w-4 border-slate-400 dark:border-slate-500"
+                                                    className="h-4 w-4 border-slate-400 "
                                                 />
                                             </label>
 
                                             {/* Option 2: Low Priority (Value: 1) */}
-                                            <label className="flex items-center p-4 rounded-lg border border-slate-300 dark:border-slate-600 has-checked:border-bgsecondary has-checked:bg-bgsecondary/5 dark:has-checked:bg-bgsecondary/10 cursor-pointer transition-all duration-200">
+                                            <label className="flex items-center p-4 rounded-lg border border-slate-300  has-checked:border-bgsecondary has-checked:bg-bgsecondary/5  cursor-pointer transition-all duration-200">
 
                                                 <span className="material-symbols-outlined text-amber-500 ">
                                                     signal_cellular_alt_2_bar
                                                 </span>
-                                                <span className="grow font-medium text-slate-800 dark:text-slate-200">Medium Priority</span>
+                                                <span className="grow font-medium text-slate-800 ">Medium Priority</span>
 
                                                 <input
                                                     {...register("priority", { required: "Please select a priority option" })}
                                                     type="radio"
                                                     value="2"
-                                                    className="h-4 w-4 border-slate-400 dark:border-slate-500 text-primary focus:ring-bgsecondary"
+                                                    className="h-4 w-4 border-slate-400  text-primary focus:ring-bgsecondary"
                                                 />
                                             </label>
 
                                             {/* Option 3: Watch After Current (Value: 3) */}
-                                            <label className="flex items-center p-4 rounded-lg border border-slate-300 dark:border-slate-600 has-checked:border-bgsecondary has-checked:bg-bgsecondary/5 dark:has-checked:bg-bgsecondary/10 cursor-pointer transition-all duration-200">
+                                            <label className="flex items-center p-4 rounded-lg border border-slate-300 has-checked:border-bgsecondary has-checked:bg-bgsecondary/5  cursor-pointer transition-all duration-200">
                                                 <span className="material-symbols-outlined text-blue-500 mr-3">low_priority</span>
-                                                <span className="grow font-medium text-slate-800 dark:text-slate-200">Low Priority</span>
+                                                <span className="grow font-medium text-slate-800 ">Low Priority</span>
 
                                                 <input
                                                     {...register("priority", { required: "Please select a priority option" })}
                                                     type="radio"
                                                     value="1"
-                                                    className="h-4 w-4 border-slate-400 dark:border-slate-500 text-primary focus:ring-bgsecondary"
+                                                    className="h-4 w-4 border-slate-400  text-primary focus:ring-bgsecondary"
                                                 />
                                             </label>
 
@@ -252,27 +252,20 @@ export default function UploadBox() {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Set Favorite</label>
+                                        <label className="block text-sm font-medium text-slate-700 mb-3">Set Favorite</label>
                                         <div className='flex items-center justify-between'>
                                             <label className="block text-sm font-medium text-black mb-2">Favorite Only</label>
                                             <label className="inline-flex items-center cursor-pointer">
                                                 <input className="sr-only peer" type="checkbox" id="isFavorite" name="isFavorite" 
                                                   {...register('isFavorite')} />
-                                                <div className="w-11 h-6 bg-slate-300 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-bgsecondary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-bgsecondary relative"></div>
+                                                <div className="w-11 h-6 bg-slate-300  peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-bgsecondary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-bgsecondary relative"></div>
                                             </label>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="space-y-8">
-                                    <div className="bg-white dark:bg-card-dark rounded-lg p-6 sm:p-8 shadow-lg dark:shadow-2xl border border-slate-200 dark:border-slate-700/50">
-                                        {/* <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-slate-300 dark:border-slate-600 border-dashed rounded-lg cursor-pointer bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" htmlFor="screenshot-upload">
-                                            <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                                                <span className="material-symbols-outlined text-5xl text-slate-400 dark:text-slate-500 mb-3">cloud_upload</span>
-                                                <p className="mb-2 text-lg font-semibold text-slate-700 dark:text-slate-300">Click or Drop Screenshot</p>
-                                                <p className="text-xs text-slate-500 dark:text-slate-400">Supported: JPG, PNG, GIF</p>
-                                            </div>
-                                            <input className="hidden" id="screenshot-upload" type="file" />
-                                        </label> */}
+                                    <div className="bg-white  rounded-lg p-6 sm:p-8 shadow-lg d border border-slate-200 ">
+                                     
                                         <label
                                             onDrop={handleDrop}
                                             onDragOver={(e) => e.preventDefault()}
@@ -330,10 +323,11 @@ export default function UploadBox() {
                                             Drag and drop your screenshot here or click to select a file.
                                         </p>
                                     </div>
-                                    <button className={isUploading ? "mt-4 w-full bg-gray-400 text-white py-2 rounded-lg cursor-not-allowed flex justify-center items-center gap-2" : "w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-semibold text-white bg-bgsecondary hover:bg-bgsecondary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bgsecondary focus:ring-offset-background-light dark:focus:ring-offset-background-dark transition-all duration-300"} type="submit"
+                                    <button className={isUploading ? "mt-4 w-full bg-gray-400 text-white py-2 rounded-lg cursor-not-allowed flex justify-center items-center gap-2" : "w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-semibold text-white bg-bgsecondary hover:bg-bgsecondary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bgsecondary focus:ring-offset-background-light transition-all duration-300"} type="submit"
                                         disabled={isUploading}>
                                         <span className="material-symbols-outlined fill">add_photo_alternate</span>
                                         Save Screenshot
+                                        {isUploading && <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-bgsecondary"></span>}
                                     </button>
                                 </div>
                             </form>

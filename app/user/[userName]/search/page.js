@@ -24,6 +24,8 @@ const Search = () => {
   const [airingStatusObj, setairingStatusObj] = useState([])
   const [isOpen, setisOpen] = useState(false)
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  //this variable to show that anime or manga is loading 
+  const [isLoading, setIsLoading] = useState(false);
   const animeTypes = [
     { label: "TV", value: "tv" },
     { label: "Movie", value: "movie" },
@@ -78,6 +80,7 @@ const Search = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const queryParams = {
           query: search,
           SearchTypeCategory: searchType,
@@ -92,6 +95,7 @@ const Search = () => {
         };
         const item = await Browse("Search", queryParams);
         setitemList(item)
+        setIsLoading(false);
         //set the filter according to url
         const params = new URLSearchParams(searchParams.toString());
         //First for year
@@ -395,7 +399,7 @@ const Search = () => {
               </div>
               {
                 isOpen && (
-                  <div className="absolute left-0 flex-col z-50 pt-2 w-max min-w-[120px]">
+                  <div className="absolute left-0 flex-col z-50 pt-2 w-max min-w-30">
 
                     {/* Actual Menu Box (Separated so we can use padding above for the hover bridge) */}
                     <div className="bg-[#1e293b] rounded-lg px-4 py-3 shadow-xl border border-slate-700">
@@ -436,7 +440,11 @@ const Search = () => {
               </span>
             </button>
           </div>
-
+          {isLoading && (
+            <div className="container mx-auto flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-bgsecondary"></div>
+            </div>
+          )}
           <div className='container w-full flex  mx-auto mt-10 gap-10 justify-center'>
             <div className='flex flex-col max-w-2/3'>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 ">
@@ -444,7 +452,10 @@ const Search = () => {
 
                 {itemList?.data?.map((item, index) => {
                   const type = (item.type === "TV" || item.type === "Movie" || item.type === "OVA" || item.type === "ONA" || item.type === "Special") ? "anime" : "manga";
-
+                  //if loading is true then do not show items
+                  if (isLoading) {
+                    return null; // Skip rendering items while loading
+                  }
 
                   return (
                     <div key={`${item.mal_id}-${index
@@ -496,7 +507,7 @@ const Search = () => {
     ${isMobileFilterOpen ? "fixed inset-0 md:inset-1/2 z-50 md:w-1/2  h-fit md:top-20 overflow-y-auto rounded-none" : "hidden"}
 
     // 2. Desktop State (Always visible sidebar)
-    lg:block lg:w-1/4 lg:sticky lg:top-20 lg:h-fit lg:max-h-[800px] lg:rounded-lg 
+    lg:block lg:w-1/4 lg:sticky lg:top-20 lg:h-fit lg:max-h-200 lg:rounded-lg 
     
     // 3. Shared Styling (Colors, shadows)
     bg-[#1F2937] p-6 shadow-lg scrollbar-hide overflow-auto

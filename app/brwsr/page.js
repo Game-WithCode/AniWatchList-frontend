@@ -20,7 +20,8 @@ const BrwsrPage = ({ }) => {
   const [SelectionType, setSelectionType] = useState([])
   const [airingStatusObj, setairingStatusObj] = useState([])
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
-
+  //this variable to show that anime or manga is loading 
+  const [isLoading, setIsLoading] = useState(false);
   const animeTypes = [
     { label: "TV", value: "tv" },
     { label: "Movie", value: "movie" },
@@ -62,21 +63,7 @@ const BrwsrPage = ({ }) => {
     // You can also add a Manga check for "Chapters"
     ...(search === "manga" ? [{ label: "Chapters", value: "chapters" }] : []),
   ];
-  // useEffect(() => {
-  //   if (!search) return
 
-  //   const fetchData = async () => {
-  //     try {
-  //       const item = await Browse(search);
-  //       setitemList(item)
-
-  //     } catch (err) {
-  //       console.error(err)
-  //     }
-  //   }
-
-  //   fetchData()
-  // }, [search])
   const [filters, setFilters] = useState({
     Year: "all",
     Genre: ["all"],
@@ -89,6 +76,7 @@ const BrwsrPage = ({ }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const queryParams = {
           page: searchParams.get('page'),
           type: searchParams.get('itemtype'),
@@ -101,6 +89,7 @@ const BrwsrPage = ({ }) => {
         };
         const item = await Browse(search, queryParams);
         setitemList(item)
+        setIsLoading(false);
         setIsMobileFilterOpen(false); // Close mobile filter on filter change
         //set the filter according to url
         const params = new URLSearchParams(searchParams.toString());
@@ -256,7 +245,7 @@ const BrwsrPage = ({ }) => {
       if (filters.maxScore == 0 || filters.maxScore == null) {
         params.delete('maxScore');
         params.delete('minScore');
-      } else {  
+      } else {
         params.set('maxScore', filters.maxScore);
         params.set('minScore', filters.minScore);
       }
@@ -346,6 +335,11 @@ const BrwsrPage = ({ }) => {
           </span>
         </button>
       </div>
+      {isLoading && (
+        <div className="container mx-auto flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-bgsecondary"></div>
+        </div>
+      )}
       <div className='container w-full flex  mx-auto mt-10 gap-10 justify-center'>
         <div className='flex flex-col max-w-2/3'>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 ">
@@ -353,7 +347,9 @@ const BrwsrPage = ({ }) => {
 
             {itemList?.data?.map((item, index) => {
               const type = (item.type === "TV" || item.type === "Movie" || item.type === "OVA" || item.type === "ONA" || item.type === "Special") ? "anime" : "manga";
-
+              if (isLoading) {
+                return null; // Skip rendering items while loading
+              }
 
               return (
                 <div key={`${item.mal_id}-${index
@@ -488,13 +484,13 @@ const BrwsrPage = ({ }) => {
                 <select
                   className="w-full appearance-none rounded-lg bg-[#374151]  px-4 py-2 pr-10 text-gray-300 outline-none transition duration-200 hover:bg-[#374151]/80 focus:ring-2 focus:ring-bgsecondary/50"
                   onChange={(e) => {
-    
+
                     //get the genre mal id 
                     const selectedId = parseInt(e.target.value);
                     // get the full genre object from the list 
                     const selectedGenreObj = allGenreOption.find((item) => item.malId === selectedId
                     )
-          
+
                     //set the malId and name 
                     if (selectedGenreObj) {
                       setSelectedGenre((prev) => {
@@ -548,7 +544,7 @@ const BrwsrPage = ({ }) => {
                 <select
                   className="w-full appearance-none rounded-lg bg-[#374151]  px-4 py-2 pr-10 text-gray-300 outline-none transition duration-200 hover:bg-[#374151]/80 focus:ring-2 focus:ring-bgsecondary/50"
                   onChange={(e) => {
-             
+
                     const value = e.target.value
                     setFilters((prev) => ({
                       ...prev,

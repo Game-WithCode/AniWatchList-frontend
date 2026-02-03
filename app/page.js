@@ -7,12 +7,14 @@ import Sample from './components/topSample';
 import { TopManga } from '@/lib/hooks/topManga';
 import { TopAnime } from '@/lib/hooks/topAnime';
 import { useSession } from "next-auth/react";
+import { set } from "mongoose";
 export default function Home() {
   const [TopAnimeData, setTopAnimeData] = useState([]);
   const [TopMangaData, setTopMangaData] = useState([]);
   const [error, setError] = useState(null);
   const [QuestionId, setQuestionId] = useState(null);
-    const { data: session, status } = useSession();
+  const { data: session, status } = useSession();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
 
@@ -35,7 +37,7 @@ export default function Home() {
       // 3. Set state correctly (replacing the array, not mutating it)
       setTopAnimeData(formatData(animeRes.data));
       setTopMangaData(formatData(mangaRes.data));
-    
+
 
     }
     fetchTop()
@@ -65,12 +67,13 @@ export default function Home() {
       answer: "To add an anime or manga to your list, go to the title's page and select the appropriate option to add it to your watchlist or reading list."
     }
   ]
- useEffect(() => {
+  useEffect(() => {
     if (status === "authenticated") {
-console.log(session);
-console.log("UserName from session:", session.user?.name);
-router.push(`/user/${session.user?.name}`);
-    } 
+      setIsAuthenticated(true);
+      console.log(session);
+      console.log("UserName from session:", session.user?.name);
+      router.push(`/user/${session.user?.name}`);
+    }
   }, [session, status]);
 
 
@@ -90,6 +93,11 @@ router.push(`/user/${session.user?.name}`);
 
   return (
     <>
+      {isAuthenticated && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="w-16 h-16 border-4 border-bgsecondary border-t-transparent border-solid rounded-full animate-spin"></div>
+        </div>
+      )}
       <header className="relative min-h-[85vh] flex items-center justify-center overflow-hidden pt-20">
         <div className="absolute inset-0 z-0">
           <img alt="Anime Landscape Background" className="w-full h-full object-cover opacity-60 scale-105" src="Images/scenery2.jpg" />

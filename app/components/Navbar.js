@@ -44,6 +44,9 @@ const Navbar = () => {
       }
     }
   }
+  let closeMenu = () => {
+    setOpenMenu(false);
+  }
  
   return (
     <>
@@ -103,8 +106,8 @@ const Navbar = () => {
                 <span className="material-symbols-outlined text-xl text-textcolor" onClick={() => router.push(`/user/${userName}/view`)}>photo_library</span>
               </button>
               <button className="flex items-center space-x-2 px-3 py-2 text-sm font-semibold text-textcolor bg-transparent border border-textcolor rounded-lg shadow-sm hover:bg-textcolor/30 hover:border-textcolor/30  hover:text-bgsecondary transition-all" onClick={() => signOutHandle()}>
-                <span>Sign Out</span>
-                <span className="material-symbols-outlined text-lg" >logout</span>
+                Sign Out
+                <span className="material-symbols-outlined text-lg ml-2" >logout</span>
               </button>
             </div>
 
@@ -122,19 +125,19 @@ const Navbar = () => {
             {/* on clicking hamburger this menu bar will open */}
             <div className={`${OpenMenu ? 'block' : 'hidden'} bg-bgprimary border-b border-gray-200 dark:border-gray-800 shadow-lg absolute w-full left-0 top-16 z-10 transition-all `} id="mobile-menu">
               <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <div className="flex items-center gap-3 text-textcolor  hover:bg-gray-50 dark:hover:bg-surface-dark px-3 py-3 rounded-md text-base font-medium transition-colors" onClick={() => router.push(`/user/${userName}`)}>
+                <div className="flex items-center gap-3 text-textcolor  hover:bg-gray-50 dark:hover:bg-surface-dark px-3 py-3 rounded-md text-base font-medium transition-colors" onClick={() => { router.push(`/user/${userName}`); closeMenu(); }}>
                   <span className="material-symbols-outlined">home</span>
                   Home
                 </div>
-                <div className="flex items-center gap-3 text-textcolor hover:bg-gray-50 dark:hover:bg-surface-dark px-3 py-3 rounded-md text-base font-medium transition-colors" onClick={() => router.push(`/user/${userName}/added?type=manga`)}>
+                <div className="flex items-center gap-3 text-textcolor hover:bg-gray-50 dark:hover:bg-surface-dark px-3 py-3 rounded-md text-base font-medium transition-colors" onClick={() => { router.push(`/user/${userName}/added?type=manga`); closeMenu(); }}>
                   <span className="material-symbols-outlined">menu_book</span>
                   Manga
                 </div>
-                <div className="flex items-center gap-3 text-textcolor hover:bg-gray-50 dark:hover:bg-surface-dark px-3 py-3 rounded-md text-base font-medium transition-colors" onClick={() => router.push(`/user/${userName}/added?type=anime`)}>
+                <div className="flex items-center gap-3 text-textcolor hover:bg-gray-50 dark:hover:bg-surface-dark px-3 py-3 rounded-md text-base font-medium transition-colors" onClick={() => { router.push(`/user/${userName}/added?type=anime`); closeMenu(); }}>
                   <span className="material-symbols-outlined">movie</span>
                   Anime
                 </div>
-                <div className="flex items-center gap-3 text-textcolor hover:bg-gray-50 dark:hover:bg-surface-dark px-3 py-3 rounded-md text-base font-medium transition-colors" onClick={() => router.push(`/user/${userName}/view`)}>
+                <div className="flex items-center gap-3 text-textcolor hover:bg-gray-50 dark:hover:bg-surface-dark px-3 py-3 rounded-md text-base font-medium transition-colors" onClick={() => { router.push(`/user/${userName}/view`); closeMenu(); }}>
                   <span className="material-symbols-outlined">image</span>
                   Screenshot
                 </div>
@@ -143,8 +146,8 @@ const Navbar = () => {
                   Browse
                 </div>
                 <div className={`${MenuBrowser ? 'flex' : 'hidden'} flex-col gap-3 text-textcolor dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-surface-dark px-12 py-3 rounded-md text-base font-medium transition-colors`} >
-                  <span className="py-2" onClick={() => router.push(`/user/${userName}/browse?type=anime`)}>Anime</span>
-                  <span className="py-2" onClick={() => router.push(`/user/${userName}/browse?type=manga`)}>Manga</span>
+                  <span className="py-2" onClick={() => { router.push(`/user/${userName}/browse?type=anime`); closeMenu(); }}>Anime</span>
+                  <span className="py-2" onClick={() => { router.push(`/user/${userName}/browse?type=manga`); closeMenu(); }}>Manga</span>
 
                 </div>
               </div>
@@ -210,7 +213,7 @@ const Navbar = () => {
             {/* this will for the Destop */}
             <div className='hidden lg:flex'>
               <nav className="flex items-center gap-6 text-sm font-medium">
-                <div className="text-textcolor hover:text-bgsecondary transition-colors cursor-pointer" onClick={() => router.push(`/`)} >Home</div>
+                <div className="text-textcolor hover:text-bgsecondary transition-colors cursor-pointer" onClick={() => router.push(`/`)}>Home</div>
                 <div className="text-textcolor hover:text-bgsecondary transition-colors cursor-pointer" onClick={() => router.push(`/firstSignUp`)}>Manga</div>
                 <div className="text-textcolor hover:text-bgsecondary transition-colors cursor-pointer" onClick={() => router.push(`/firstSignUp`)}>Anime</div>
                 <div className="text-textcolor hover:text-bgsecondary transition-colors cursor-pointer" onClick={() => router.push(`/firstSignUp`)}>Screenshot</div>
@@ -267,19 +270,19 @@ const Navbar = () => {
             {/* on clicking hamburger this menu bar will open */}
             <div className={`${OpenMenu ? 'block' : 'hidden'} bg-bgprimary border-b border-gray-200 dark:border-gray-800 shadow-lg absolute w-full left-0 top-16 z-100`} id="mobile-menu">
               <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <div className="flex items-center gap-3 text-textcolor  hover:bg-gray-50 dark:hover:bg-surface-dark px-3 py-3 rounded-md text-base font-medium transition-colors" onClick={() => router.push(`/`)}>
+                <div className="flex items-center gap-3 text-textcolor  hover:bg-gray-50 dark:hover:bg-surface-dark px-3 py-3 rounded-md text-base font-medium transition-colors" onClick={() => {router.push(`/`); closeMenu(); }}>
                   <span className="material-symbols-outlined">home</span>
                   Home
                 </div>
-                <div className="flex items-center gap-3 text-textcolor hover:bg-gray-50 dark:hover:bg-surface-dark px-3 py-3 rounded-md text-base font-medium transition-colors" onClick={() => router.push(`/firstSignUp`)}>
+                <div className="flex items-center gap-3 text-textcolor hover:bg-gray-50 dark:hover:bg-surface-dark px-3 py-3 rounded-md text-base font-medium transition-colors" onClick={() => {router.push(`/firstSignUp`); closeMenu(); }}>
                   <span className="material-symbols-outlined">menu_book</span>
                   Manga
                 </div>
-                <div className="flex items-center gap-3 text-textcolor hover:bg-gray-50 dark:hover:bg-surface-dark px-3 py-3 rounded-md text-base font-medium transition-colors" onClick={() => router.push(`/firstSignUp`)}>
+                <div className="flex items-center gap-3 text-textcolor hover:bg-gray-50 dark:hover:bg-surface-dark px-3 py-3 rounded-md text-base font-medium transition-colors" onClick={() => {router.push(`/firstSignUp`); closeMenu(); }}>
                   <span className="material-symbols-outlined">movie</span>
                   Anime
                 </div>
-                <div className="flex items-center gap-3 text-textcolor hover:bg-gray-50 dark:hover:bg-surface-dark px-3 py-3 rounded-md text-base font-medium transition-colors" onClick={() => router.push(`/firstSignUp`)}>
+                <div className="flex items-center gap-3 text-textcolor hover:bg-gray-50 dark:hover:bg-surface-dark px-3 py-3 rounded-md text-base font-medium transition-colors" onClick={() => {router.push(`/firstSignUp`); closeMenu(); }}>
                   <span className="material-symbols-outlined">image</span>
                   Screenshot
                 </div>
@@ -288,14 +291,14 @@ const Navbar = () => {
                   Browse
                 </div>
                 <div className={`${MenuBrowser ? 'flex' : 'hidden'} flex-col gap-3 text-textcolor dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-surface-dark px-12 py-3 rounded-md text-base font-medium transition-colors`} >
-                  <span className="py-2" onClick={() => router.push(`/brwsr?type=anime`)}>Anime</span>
-                  <span className="py-2" onClick={() => router.push(`/brwsr?type=manga`)}>Manga</span>
+                  <span className="py-2" onClick={() => {router.push(`/brwsr?type=anime`); closeMenu();}}>Anime</span>
+                  <span className="py-2" onClick={() => {router.push(`/brwsr?type=manga`); closeMenu();}}>Manga</span>
 
                 </div>
               </div>
               <div className="pt-2 pb-2 border-t border-gray-200 dark:border-gray-800">
                 <div className="px-2 space-y-2">
-                  <div className="flex items-center justify-center gap-2 w-full px-4 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-teal-600 transition-colors shadow-md" onClick={() => router.push(`/login`)}>
+                  <div className="flex items-center justify-center gap-2 w-full px-4 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-teal-600 transition-colors shadow-md" onClick={() => {router.push(`/login`); closeMenu();}}>
                     Log In
                     <span className="material-symbols-outlined">login</span>
                   </div>
@@ -324,7 +327,7 @@ const Navbar = () => {
               <button className="flex items-center justify-center rounded-full p-2 text-gray-500 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
                 onClick={() => {
                   if (MobileSearch !== "" || MobileSearch.length > 0) {
-                    router.push(`/user/${userName}/search?q=${MobileSearch}&type=anime`);
+                    router.push(`/Search?q=${MobileSearch}&type=anime`);
                   }
                 }}
               >

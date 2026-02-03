@@ -245,78 +245,11 @@ const ScreenshotViewer = () => {
                                     <PrioritySection item={SortingData["High_priority"]} />
                                     {/* for medium priority */}
                                     <h1 className='font-semibold text-2xl mb-6 mt-6'>Here Medium priority </h1>
-                                    {/* <div className='flex gap-2 items-center '>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6  w-full h-fit">
 
-                            {
-                                SortingData.Medium_priority.length > 0 ? (
-                                    SortingData.Medium_priority.map((item, index) => {
-                                        if (index >= 4) {
-                                            return null; // Limit to 4 items
-                                        }
-                                        return (
-                                            <div key={index} className="bg-background-secondary/70 border border-border-color rounded-xl shadow-soft hover:shadow-soft-lg hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col group max-h-fit w-full"
-                                                onClick={detailHandler(item)}
-                                            >
-                                                <div className="relative">
-                                                    <img alt={`Anime screenshot ${index + 1}`} className="w-full h-48 object-cover" src={item.imageUrl} />
-                                                    <div className="absolute top-3 right-3 text-xs font-medium text-text-secondary bg-background-secondary/80 backdrop-blur-3xl text-white px-2.5 py-1 rounded-full">{new Date(item.uploadedAt).toLocaleDateString()}</div>
-                                                </div>
-                                                <div className="p-4 flex flex-col grow">
-                                                    <span className="inline-block bg-cyan-500/10 text-cyan-400 text-xs font-semibold px-2.5 py-1 rounded-full mb-3 self-start">{item.tag || "No Tag"}</span>
-                                                    <h3 className="font-bold text-lg text-text-primary group-hover:text-primary transition-colors">{item.title}</h3>
-                                                    <p className="text-sm text-text-secondary mt-1">{item.description}</p>
-                                                </div>
-                                            </div>
-                                        )
-                                    })
-
-                                ) : (
-                                    <p className="text-center col-span-full">No screenshots Medium priority yet.</p>
-                                )
-                            }
-                        </div>
-                        <span className="material-symbols-outlined cursor-pointer text-3xl font-bold hover:scale-105" style={{ fontSize: '32px' }}>
-                            expand_circle_down
-                        </span>
-                    </div> */}
                                     <PrioritySection item={SortingData["Medium_priority"]} />
                                     {/* For Low priority */}
                                     <h1 className='font-semibold text-2xl mb-6 mt-6'>Here Low priority </h1>
-                                    {/* <div className='flex gap-2 items-center '>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6  w-full h-fit">
-
-                            {
-                                SortingData.Low_priority.length > 0 ? (
-                                    SortingData.Low_priority.map((item, index) => {
-                                        if (index >= 4) {
-                                            return null; // Limit to 4 items
-                                        }
-                                        return (
-                                            <div key={index} className="bg-background-secondary/70 border border-border-color rounded-xl shadow-soft hover:shadow-soft-lg hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col group max-h-fit"
-                                                onClick={detailHandler(item)}
-                                            >
-                                                <div className="relative">
-                                                    <img alt={`Anime screenshot ${index + 1}`} className="w-full h-48 object-cover" src={item.imageUrl} />
-                                                    <div className="absolute top-3 right-3 text-xs font-medium text-text-secondary bg-background-secondary/80 backdrop-blur-3xl text-white px-2.5 py-1 rounded-full">{new Date(item.uploadedAt).toLocaleDateString()}</div>
-                                                </div>
-                                                <div className="p-4 flex flex-col grow">
-                                                    <span className="inline-block bg-cyan-500/10 text-cyan-400 text-xs font-semibold px-2.5 py-1 rounded-full mb-3 self-start">{item.tag || "No Tag"}</span>
-                                                    <h3 className="font-bold text-lg text-text-primary group-hover:text-primary transition-colors">{item.title}</h3>
-                                                    <p className="text-sm text-text-secondary mt-1">{item.description}</p>
-                                                </div>
-                                            </div>
-                                        )
-                                    })
-                                ) : (
-                                    <p className="text-center col-span-full">No screenshots Low priority yet.</p>
-                                )
-                            }
-                        </div>
-                        <span className="material-symbols-outlined cursor-pointer text-3xl font-bold hover:scale-105" style={{ fontSize: '32px' }}>
-                            expand_circle_down
-                        </span>
-                    </div> */}
+                                   
                                     <PrioritySection item={SortingData["Low_priority"]} />
                                 </>)
                             }
