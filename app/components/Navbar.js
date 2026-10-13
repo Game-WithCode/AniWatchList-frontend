@@ -51,7 +51,7 @@ const Navbar = () => {
   return (
     <>
       {status === "authenticated" ? (
-        <div className='container mx-auto px-4 sm:px-6 lg:px-8 '>
+        <div className='container mx-auto px-4 sm:px-6 lg:px-8 relative z-50'>
           <div className='flex items-center justify-between h-16'>
 
 
@@ -195,7 +195,7 @@ const Navbar = () => {
           </div>
         </div>
       ) : (
-        <div className='container mx-auto px-4 sm:px-6 lg:px-8 '>
+        <div className='container mx-auto px-4 sm:px-6 lg:px-8 relative z-50'>
           <div className='flex items-center justify-between h-16'>
 
 

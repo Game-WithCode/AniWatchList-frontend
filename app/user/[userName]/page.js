@@ -1,57 +1,25 @@
 import React from 'react'
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]/route";
-import Coursel from './Components/Coursel';
-import ContinueItem from './Components/ContinueItem';
-import { TopAnime } from '@/lib/hooks/topAnime';
-import { getCategory } from "@/lib/hooks/getType"
-import { getWatchlistData } from "@/lib/action/getWatchlist";
-import { TopManga } from '@/lib/hooks/topManga';
-import UserStats from './Components/userStats';
 
+import ContinueItem from './Components/ContinueItem';
+
+
+import { getWatchlistData } from "@/lib/action/getWatchlist";
+
+import UserStats from './Components/userStats';
+import Sample from '@/app/components/topSample';
+import { GetTrending } from "@/lib/action/GetTrending";
 const dashboard = async () => {
   const session = await getServerSession(authOptions);
-  const fetchTopAnime = await TopAnime();
-  const fetchTopManga = await TopManga();
+
 
   const watchlist = await getWatchlistData(session.user.email);
   const sortedAnimeWatchlist = watchlist?.anime?.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
   const sortedMangaWatchlist = watchlist?.manga?.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
   const sortedScreenshotWatchlist = watchlist?.screenshots?.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
-  const TopAnimeData = []
-  const TopMangaData = []
-
-  fetchTopAnime.data?.map((item, index) => {
-    if (index > 10) return
-    const itemType = getCategory(item.type)
-    TopAnimeData.push({
-      mal_Id: item.mal_id,
-      title: item.title_english,
-      description: item.synopsis,
-      Genre: item.genres?.map((i) => i.name),
-      Scores: item.score,
-      Images: item.images.webp.large_image_url,
-      type: itemType,
-      RawType: item.type
-    })
-  })
-  fetchTopManga.data?.map((item, index) => {
-    if (index > 10) return
-    const itemType = getCategory(item.type)
-    TopMangaData.push({
-      mal_Id: item.mal_id,
-      title: item.title_english,
-      description: item.synopsis,
-      Genre: item.genres?.map((i) => i.name),
-      Scores: item.score,
-      Images: item.images.webp.large_image_url,
-      type: itemType,
-      RawType: item.type
-    })
-  })
-
-  
+ 
   const ItemDataList = {
     ContinueWatching: [],
     ContinueReading: [],
@@ -96,7 +64,12 @@ const dashboard = async () => {
       Image: item.imageUrl,
     })
   })
-
+const data = await GetTrending({ Type: "ANIME" });
+const data2 = await GetTrending({ Type: "MANGA" });
+  let fetchTopAnime;
+  let fetchTopManga;
+  fetchTopAnime = data?.data?.Page?.media || [];
+  fetchTopManga = data2?.data?.Page?.media || [];
 
   return (
     <>
@@ -105,8 +78,8 @@ const dashboard = async () => {
 
         {/* create coursel for top anime manga movie */}
         <div className=' w-full  overflow-hidden mt-10'>
-          <Coursel slider={TopAnimeData} itemType="anime" />
-          <Coursel slider={TopMangaData} itemType="manga"/>
+          <Sample slider={fetchTopAnime} itemType={"anime"} />
+          <Sample slider={fetchTopManga} itemType={"manga"} />
         </div>
         {/* container */}
         {/* section 2 */}
@@ -115,7 +88,7 @@ const dashboard = async () => {
           <div className='w-full m-auto mt-20 mb-10'>
             <h1 className='text-3xl font-bold text-center'>Welcome Back, {session.user.name}  </h1>
             <p className='text-center text-gray-600 mt-4'>{"Here's a quick overview of your activity and stats."}</p>
-            <UserStats/>
+            <UserStats />
           </div>
           {/* continue Anime  */}
 

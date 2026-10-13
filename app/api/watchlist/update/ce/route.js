@@ -28,7 +28,7 @@ export async function POST(request) {
         const episodesProgress = body.episodesProgress || [];
         const totalEpisodes = body.totalEpisodes || 0;
         const rewatches = body.rewatches || 0;
-        const Rating = body.rating || 0;
+        const Rating = body.userRating || 0;
         const isFavorite = body.favorite || false;
         //i want if userStatus is complete then add finish date also 
 

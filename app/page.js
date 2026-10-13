@@ -2,12 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { getCategory } from "@/lib/hooks/getType"
+
 import Sample from './components/topSample';
-import { TopManga } from '@/lib/hooks/topManga';
-import { TopAnime } from '@/lib/hooks/topAnime';
 import { useSession } from "next-auth/react";
 import { set } from "mongoose";
+import { GetTrending } from "@/lib/action/GetTrending";
 export default function Home() {
   const [TopAnimeData, setTopAnimeData] = useState([]);
   const [TopMangaData, setTopMangaData] = useState([]);
@@ -19,29 +18,15 @@ export default function Home() {
   useEffect(() => {
 
     const fetchTop = async () => {
-      // 1. Fetch both in parallel for speed
-      const [animeRes, mangaRes] = await Promise.all([TopAnime(), TopManga()]);
-
-      // 2. Helper function to format data cleanly
-      const formatData = (list) => list.slice(0, 11).map(item => ({
-        mal_Id: item.mal_id,
-        title: item.title_english || item.title, // Fallback if english title is null
-        description: item.synopsis,
-        Genre: item.genres?.map((i) => i.name),
-        Scores: item.score,
-        Images: item.images.webp.large_image_url,
-        type: getCategory(item.type),
-        RawType: item.type
-      }));
-
-      // 3. Set state correctly (replacing the array, not mutating it)
-      setTopAnimeData(formatData(animeRes.data));
-      setTopMangaData(formatData(mangaRes.data));
-
-
+    
+      const data = await GetTrending("ANIME");
+      const data2 = await GetTrending("MANGA");
+      setTopAnimeData(data?.data?.Page?.media || []);
+      setTopMangaData(data2?.data?.Page?.media || []);
+      console.log("TopAnimeData:", data);
+      console.log("TopMangaData:", data2);
     }
     fetchTop()
-
 
 
   }, [])
@@ -129,7 +114,7 @@ export default function Home() {
       {/* section for fAQ  */}
       <section className="max-w-7xl mx-auto px-6 py-24 border-t border-white/5 mt-12 bg-slate-950/30">
         <div className="grid md:grid-cols-2 gap-16 items-center">
-          <div className="relative h-[450px] flex items-center justify-center">
+          <div className="relative h-112.5 flex items-center justify-center">
             <div className="absolute inset-0 bg-bgsecondary/10 blur-[120px] rounded-full"></div>
             <div className="absolute top-0 right-0 text-white/5 text-[200px] font-black leading-none select-none z-0">?</div>
             <div className="absolute bottom-10 left-10 text-bgsecondary/10 text-[150px] font-black leading-none select-none z-0 -rotate-12">!</div>

@@ -115,7 +115,7 @@ const ScreenshotViewer = () => {
                 //Stauts filter (continue/watched/planned/pause/drop)
                 if (filters.status !== "all") {
                     // setIsfilterAppled(true)
-                    const itemStatus = (item.userStatus || "N/A").toLowerCase();
+                    const itemStatus = (item.UserStatus || "N/A").toLowerCase();
                     const filterStatus = filters.status.toLowerCase();
                     if (itemStatus !== filterStatus) isValid = false;
                 }

@@ -2,238 +2,191 @@
 import React, { use } from 'react'
 import { ChevronDown, ChevronUp, X, Heart } from "lucide-react";
 import { useState, useEffect } from 'react';
-import { itemfind } from '@/lib/hooks/itemfind';
+import { itemfind, itemExists, getItemDetails } from '@/lib/hooks/itemfind';
 import { toast } from 'react-toastify';
-import { set } from 'mongoose';
 
+import { upsertItem } from '@/lib/hooks/upsert';
 
 const UpdateForm = ({ item, status, onClose }) => {
+    console.log("Receiving item:", item, "status:", status);
+    //common State Variables
+    const [commonData, setCommonData] = useState({
+        UserStatus: status || null,
+        favorite: false,
+        rating: null,
+        repeat: 0,
+        startDate: null,
+        endDate: null,
+        updateAt: null,
+        priority: 1,
+        notes: null,
+        itemType: item.type.toLowerCase() || null,
+        itemId: item.id || null,
+        title: item.title.english || item.title.romaji || null,
+        image: item.coverImage?.extraLarge || null,
+        genres: item.genres || [],
+        format: item.format || null,
+        WatchAll: false,
+    });
+    // For the Item Data 
+    const [animeDbDataList, setAnimeDbDataList] = useState({
+        epProgress: [],
+        totalEpisodes: null,
 
-    const [selectedStatus, setSelectedStatus] = useState(
-        Array.isArray(status) && status.length === 0
-            ? "Planning"
-            : status || "Planning"
-    );
-    const [repeatCount, setRepeatCount] = useState(0);
-    const [rating, setRating] = useState(0);
-    const [EPprogress, setEPprogress] = useState(0);
-    const [selectedEpisodes, setSelectedEpisodes] = useState([]);
-    const [startDate, setStartDate] = useState("");
-    const [finishDate, setFinishDate] = useState("");
-    const [updatedDate, setUpdatedDate] = useState("");
-    const [isFavorite, setIsFavorite] = useState(false);
-    const [notes, setNotes] = useState("");
-    const [CHprogress, setCHprogress] = useState(0);
-    const [VOLprogress, setVOLprogress] = useState(0);
-    const [watchAll, setWatchAll] = useState(false);
-    const [genre, setgenre] = useState([])
-    const [priority, setpriority] = useState(2);
-    // if itemtype is anime then each by episode but if manga then by chapter
-    const categoryType = item.type;
-    const itemType = (categoryType === "TV" || categoryType === "Movie" || categoryType === "OVA" || categoryType === "ONA" || categoryType === "Special") ? "anime" : "manga";
-    const episodes = Array.from({ length: (itemType === "anime" ? item.episodes : item.chapters) }, (_, i) => i + 1);
-    const toggleEpisode = (ep) => {
-        let newSelected;
+    });
+    const [mangaDbDataList, setMangaDbDataList] = useState({
+        chProgress: [],
+        totalChapters: null,
+        totalVolumes: null,
+    });
+    //First check if the item is present in the database or not 
+  useEffect(() => {
+    const fetchItem = async () => {
+        try {
+            console.log("ENTERING IN FETCH ITEM FUNCTION");
+            
+            const foundItem = await getItemDetails(item.id, item.type.toLowerCase());
 
-        if (selectedEpisodes.includes(ep)) {
-            // Remove episode
-            newSelected = selectedEpisodes.filter((e) => e !== ep);
-        } else {
-            // Add episode
-            newSelected = [...selectedEpisodes, ep];
-        }
-
-        // Sort the array
-        newSelected.sort((a, b) => a - b);
-
-        // Update state once
-        setSelectedEpisodes(newSelected);
-    };
-    let itemReceiver = async () => {
-        return await itemfind();
-    }
-    let handlerClose = () => {
-        onClose();
-    }
-    useEffect(() => {
-        const fetchAnime = async () => {
-            try {
-
-                const data = await itemReceiver();
-                const animeList = data?.watchlist?.[itemType] || []
-                const foundItem = animeList.find(items => items.mal_id == item.mal_id)
-                const currentEp = foundItem?.episodesProgress || [];
-                //i want currentEp last value
-                const lastEpisode = currentEp[currentEp.length - 1];
-                setEPprogress(lastEpisode || 0);
-                setRating(foundItem?.userRating || 0);
-                setRepeatCount(foundItem?.rewatches || 0);
-                setStartDate(foundItem?.addedAt || "");
-                setFinishDate(foundItem?.finishAt || "");
-                setUpdatedDate(foundItem?.updatedAt || "");
-                setIsFavorite(foundItem?.favorite || false);
-                setNotes(foundItem?.note || "");
-                setpriority(foundItem?.priority || 2)
-                const findedGeneres = []
-                item.genres?.map((item) => {
-                    findedGeneres.push(item.name)
-                })
-
-                setgenre(findedGeneres)
-
-                if (itemType === "manga") {
-                    const currentCh = foundItem?.chaptersProgress || [];
-                    setSelectedEpisodes(currentCh);
-                    const lastChapter = currentCh[currentCh.length - 1];
-                    setCHprogress(lastChapter || 0);
-                    setVOLprogress(foundItem?.VolumesProgress || 0);
-                }
-
-
-
-                if (Array.isArray(currentEp)) {
-                    // Flatten and ensure only numbers go in
-                    setSelectedEpisodes(prev => [
-                        ...new Set([...prev, ...currentEp?.map(Number)]),
-                    ]);
-                } else {
-                    setSelectedEpisodes(prev =>
-                        prev.includes(currentEp) ? prev : [...prev, Number(currentEp)]
-                    );
-                }
-
-
-
-
-            } catch (err) {
-                console.error('Error fetching anime:', err);
+            // 1. Only update common data if the item exists in DB
+            if (foundItem) {
+                setCommonData((prev) => ({
+                    ...prev,
+                    UserStatus: foundItem?.UserStatus || prev.UserStatus || null,
+                    favorite: foundItem?.favorite || false,
+                    rating: foundItem?.userRating || null,
+                    repeat: foundItem?.rewatches || 0,
+                    startDate: foundItem?.addedAt || null,
+                    endDate: foundItem?.finishAt || null,
+                    updateAt: foundItem?.updatedAt || null,
+                    notes: foundItem?.note || null,
+                    priority: foundItem?.priority || null,
+                }));
             }
-        };
-        fetchAnime();
-    }, []);
+
+            // 2. ALWAYS set the type-specific data, regardless of foundItem
+            // Move this OUTSIDE the `if (foundItem)` block
+            if (item?.type?.toLowerCase() === 'anime') {
+                console.log("Setting anime data list with episodes:", item.episodes);
+                setAnimeDbDataList({
+                    epProgress: foundItem?.episodesProgress || [],
+                    totalEpisodes: item?.episodes || null,
+                });
+            } else if (item?.type?.toLowerCase() === 'manga') {
+                setMangaDbDataList({
+                    // FIX: Changed fallback from 0 to [] to match your array schema
+                    chProgress: foundItem?.chaptersProgress || [], 
+                    totalChapters: item?.chapters || null,
+                    totalVolumes: item?.volumes || null,
+                });
+            }
+
+            console.log("end of fetchItem function");
+        } catch (err) {
+            console.error('Error fetching item:', err);
+        }
+    };
+    fetchItem();
+}, []);
+    console.log("Current item state:", commonData, "Anime Data:", animeDbDataList, "Manga Data:", mangaDbDataList);
+
+    //state variables & validate logic
     let handlerSave = async (e) => {
         toast.dismiss();
-        if (itemType === "anime") {
-            const EPCount = Array.from({ length: EPprogress }, (_, i) => i + 1);
-            const updatedEpisodes = Array.from(new Set([...selectedEpisodes, ...EPCount]))
-                .sort((a, b) => a - b);
-
-            // Update state for UI
-            setSelectedEpisodes(updatedEpisodes);
+        e.preventDefault();
 
 
-            e.preventDefault();
-            let itemPresent = await itemReceiver();
+        let itemsExists = await itemExists(commonData.itemId, commonData.itemType);
 
+        let cleanedProgress = [...new Set((animeDbDataList.epProgress || []).map(Number))]
+            .sort((a, b) => a - b);
 
+        // Create a mutable copy of the current state for this transaction
+        let payload = { ...commonData };
 
-            const dbitem = itemPresent?.watchlist?.[itemType] ?? [];
-            const isItemAlreadyAdded = dbitem.some(i => i.mal_id === item.mal_id);
+        if (payload.itemType === "anime") {
+            if (itemsExists) {
+                let itemDbData = await getItemDetails(payload.itemId, payload.itemType);
 
-            if (!isItemAlreadyAdded) {
-                const res = await fetch("/api/watchlist/add", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        mal_id: item.mal_id,
-                        title: item.title_english,
-                        image: item.images.webp.large_image_url,
-                        priority: priority,
-                        itemType: itemType,
-                        genres: genre,
-                        userStatus: selectedStatus,
-                        category: categoryType,
-                        episodesProgress: updatedEpisodes.filter(ep => ep != null),
-                        favorite: isFavorite,
-                        rewatches: repeatCount,
-                        rating: rating,
-                        totalEpisodes: item.episodes,
-                        note: notes,
-
-                    }),
-                });
-                const result = await res.json();
-                if (res.status === 201) {
-                    toast.success(`${categoryType} added successfully!`, {
-                        toastId: 'save-success'
-                    });
-                    onClose();
-                } else if (res.status === 409) {
-                    toast.error("item is not added!");
-                } else if (res.status === 200) {
-                    toast.info("item already added!");
-                } else {
-                    toast.error("❌ Something went wrong. Try again!");
+                // Handle Rewatch wipe
+                if (payload.UserStatus === "Rewatch" && itemDbData.UserStatus !== "Rewatch") {
+                    setAnimeDbDataList({ ...animeDbDataList, epProgress: [] });
+                    cleanedProgress = [];
                 }
 
-            } else {
-                //if staus is continue and use update episode to last episode so add to completed if episodes progress equal to total episodes
-                //it create local selectedStatus to take the value of selectedStatus state
-                let localSelectedStatus = selectedStatus;
-                let localRepeatCount = repeatCount;
-                let findUserStatus = dbitem.find(i => i.mal_id === item.mal_id);
-                if (localSelectedStatus === "Rewatch" && findUserStatus.UserStatus !== "Rewatch") {
+                // Safety check: ensure totalEpisodes > 0 before auto-completing
+                const totalEps = animeDbDataList.totalEpisodes || 0;
 
-                    updatedEpisodes.length = 0;
-                }
-                if (updatedEpisodes.length === item.episodes) {
-                    if (selectedStatus === "Rewatch") {
-                        localRepeatCount += 1;
+                if (totalEps > 0 && cleanedProgress.length === totalEps) {
+                    if (payload.UserStatus === "Rewatch") {
+                        payload.repeat += 1;
                     }
 
-                    localSelectedStatus = "Completed";
-                    setSelectedStatus(localSelectedStatus);
+                    payload.UserStatus = "Completed";
+                    //this is where it ended so i have to give end date 
+                    setCommonData(prev => ({ ...prev, endDate: new Date().toISOString() }));
 
-                    // userStatus is rewatch then increase the repeat number
-                    if (selectedStatus !== "Completed") {
-                        toast.success(`Congrat you completed the series!`);
+                    if (commonData.UserStatus !== "Completed") {
+                        toast.success(`Congrats, you completed the series!`);
                     }
+
+                    // Sync the state with our updated payload
+                    setCommonData(payload);
                 }
-                //if user selected the rewatch then we have to empty the epProgress but if userStatus is not rewatch then we have to keep the epProgress as it is
-
-
-
-                const res = await fetch(`/api/watchlist/update/ce`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        mal_id: item.mal_id,
-                        title: item.title,
-                        image: item.images.webp.large_image_url,
-                        itemType: itemType,
-
-                        userStatus: localSelectedStatus,
-                        priority: priority,
-                        category: categoryType,
-                        episodesProgress: updatedEpisodes.filter(ep => ep != null),
-                        rewatches: localRepeatCount,
-                        favorite: isFavorite,
-                        rating: rating,
-                        totalEpisodes: item.episodes,
-                        note: notes,
-                    }),
-                });
-                const result = await res.json();
-                if (res.status === 200) {
-                    toast.success(`Item updated successfully!`);
-                    onClose()
-                } else {
-
-                    toast.error("❌ Something went wrong. Try again!");
-                }
-
             }
-        } else {
-            handlerManga();
+        } else if (payload.itemType === "manga") {
+            if (itemsExists) {
+                cleanedProgress = [...new Set((mangaDbDataList.chProgress || []).map(Number))]
+                    .sort((a, b) => a - b);
+                let itemDbData = await getItemDetails(payload.itemId, payload.itemType);
+
+                // Handle Rewatch wipe
+                if (payload.UserStatus === "Rewatch" && itemDbData.UserStatus !== "Rewatch") {
+                    setMangaDbDataList({ ...mangaDbDataList, chProgress: [] });
+                    cleanedProgress = [];
+                }
+
+                // Safety check: ensure totalChapters > 0 before auto-completing
+                const totalChps = mangaDbDataList.totalChapters || 0;
+
+                if (totalChps > 0 && cleanedProgress.length === totalChps) {
+                    if (payload.UserStatus === "Rewatch") {
+                        payload.repeat = Number(payload.repeat) + 1;
+                    }
+
+                    payload.UserStatus = "Completed";
+
+                    if (commonData.UserStatus !== "Completed") {
+                        toast.success(`Congrats, you completed the series!`);
+                    }
+
+                    // Sync the state with our updated payload
+                    setCommonData(payload);
+                }
+            }
         }
-    }
+
+        // Pass the locally updated payload, NEVER the stale commonData state
+        ;
+        const res = await upsertItem(
+            payload,
+            commonData.itemType === "anime" ? animeDbDataList.totalEpisodes : null,
+            commonData.itemType === "manga" ? mangaDbDataList.totalChapters : null,
+            commonData.itemType === "manga" ? mangaDbDataList.totalVolumes : null,
+            cleanedProgress,
+
+        );
+        res.status === "success" ? toast.success(res.message) : toast.error(res.message);
+    };
+
+
+
     let handlerDelete = async () => {
         const res = await fetch(`/api/watchlist/remove`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                mal_id: item.mal_id,
-                itemType: itemType,
+                mal_id: commonData.itemId,
+                itemType: commonData.itemType,
             }),
         });
         const result = await res.json();
@@ -245,163 +198,69 @@ const UpdateForm = ({ item, status, onClose }) => {
             toast.error("❌ Something went wrong. Try again!");
         }
     }
-    let addFavorite = async () => {
-        setIsFavorite(!isFavorite);
+    //Event Handlers
+    let handlerClose = () => {
+        onClose();
     }
+
     // Handle watch all toggle
     const handleWatchAll = async (checked) => {
-        setWatchAll(checked);
-        const Progress = EPprogress || CHprogress;
-        const total = itemType === "anime" ? item.episodes : item.chapters;
+        setCommonData(prev => ({ ...prev, WatchAll: checked }));
+        const total = commonData.itemType === "anime" ? animeDbDataList.totalEpisodes : mangaDbDataList.totalChapters;
         if (checked) {
-            updateEPCH(total)
-
+            if (commonData.itemType === "anime") {
+                setAnimeDbDataList(prev => ({ ...prev, epProgress: Array.from({ length: total }, (_, i) => i + 1) }));
+            } else {
+                setMangaDbDataList(prev => ({ ...prev, chProgress: Array.from({ length: total }, (_, i) => i + 1) }));
+            }
         } else {
-            const data = await itemfind();
-            const animeList = data?.watchlist?.[itemType] || [];
+
             // Use '===' for strict equality
-            const foundItem = animeList.find(items => items.mal_id === item.mal_id);
+            const foundItem = await getItemDetails(commonData.itemId, commonData.itemType);
             // Fix: Add space after foundItem and handle the 'else' case correctly
             const currentEp = foundItem
-                ? (itemType === "anime" ? foundItem.episodesProgress : foundItem.chaptersProgress)
+                ? (commonData.itemType === "anime" ? foundItem.episodesProgress : foundItem.chaptersProgress)
                 : [];
-            updateEPCH(currentEp.length || 0);
+            if (commonData.itemType === "anime") {
+                setAnimeDbDataList(prev => ({ ...prev, epProgress: currentEp }));
+            } else {
+                setMangaDbDataList(prev => ({ ...prev, chProgress: currentEp }));
+            }
+        }
+        console.log("Watch All toggled:", checked, "Total:", total, "Current Progress:", commonData.itemType === "anime" ? animeDbDataList.epProgress : mangaDbDataList.chProgress);
+    };
+    const generateUnitSequence = (latestUnit) => {
+        if (!latestUnit || latestUnit < 1) return [];
+        // Creates an array of sequential numbers from 1 to latestUnit
+        return Array.from({ length: latestUnit }, (_, i) => i + 1);
+    };
+    const toggleEpisode = (unit) => {
+        let newSelected;
+        if (commonData.itemType === "anime") {
+            newSelected = [...animeDbDataList.epProgress];
+            //if the episode is already selected, remove it, otherwise add it
+            if (newSelected.includes(unit)) {
+                newSelected = newSelected.filter((e) => e !== unit);
+            } else {
+                newSelected.push(unit);
+            }
+            newSelected.sort((a, b) => a - b);
+            setAnimeDbDataList(prev => ({ ...prev, epProgress: newSelected }));
+        } else if (commonData.itemType === "manga") {
+            newSelected = [...mangaDbDataList.chProgress];
+            //if the episode is already selected, remove it, otherwise add it
+            if (newSelected.includes(unit)) {
+                newSelected = newSelected.filter((e) => e !== unit);
+            } else {
+                newSelected.push(unit);
+            }
+            newSelected.sort((a, b) => a - b);
+            setMangaDbDataList(prev => ({ ...prev, chProgress: newSelected }));
         }
     };
-    let updateEPCH = (e) => {
-        //let update selectedEpisode on click chaper Progress bar
-
-        const Progress = e;
-        if (itemType === "anime") {
-            const EPCount = Array.from({ length: Progress }, (_, i) => i + 1);
-
-            setSelectedEpisodes(EPCount);
-        } else {
-            const CHCount = Array.from({ length: Progress }, (_, i) => i + 1);
-
-            setSelectedEpisodes(CHCount);
-        }
-    }
-    useEffect(() => {
-        // If all episodes/chapters are selected, check the "Watch All" box
-        const total = itemType === "anime" ? item.episodes : item.chapters;
-        if (selectedEpisodes.length === total && total > 0) {
-            setWatchAll(true);
-        } else {
-            setWatchAll(false);
-        }
-        if (itemType === "anime") {
-            setEPprogress(selectedEpisodes.length);
-        } else {
-            setCHprogress(selectedEpisodes.length);
-        }
-    }, [selectedEpisodes]);
-    //if selectedEpisode change than change the EPprogress and CHprogress
-
-    // let create handler which handle manga and anime form  separately
-    let handlerManga = async () => {
-
-        const CPCount = Array.from({ length: CHprogress }, (_, i) => i + 1);
-        const updatedEpisodes = Array.from(new Set([...selectedEpisodes, ...CPCount]))
-            .sort((a, b) => a - b);
-        // Update state for UI
-        setSelectedEpisodes(updatedEpisodes);
-
-        let itemPresent = await itemReceiver();
-        const dbitem = itemPresent?.watchlist?.[itemType] ?? [];
-        const isItemAlreadyAdded = dbitem.some(i => i.mal_id === item.mal_id);
-        if (!isItemAlreadyAdded) {
-            const res = await fetch(`/api/watchlist/add`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    mal_id: item.mal_id,
-                    title: item.title,
-                    image: item.images.webp.large_image_url,
-                    itemType: itemType,
-                    genres: genre,
-                    priority: priority,
-                    userStatus: selectedStatus,
-                    category: categoryType,
-                    chaptersProgress: updatedEpisodes.filter(ep => ep != null),
-                    VolumesProgress: VOLprogress,
-                    totalVolumes: item.volumes,
-                    totalChapters: item.chapters,
-                    rewatches: repeatCount,
-                    favorite: isFavorite,
-                    rating: rating,
-                    totalEpisodes: item.episodes,
-                    note: notes,
-                }),
-            });
-            const result = await res.json();
-            if (res.status === 201) {
-                toast.success(`Item updated successfully!`);
-                onClose()
-            } else {
-
-                toast.error("❌ Something went wrong. Try again!");
-            }
-        } else {
-            let localSelectedStatus = selectedStatus;
-
-            let localRepeatCount = repeatCount;
-            let localVolumesProgress = VOLprogress;
-            let findUserStatus = dbitem.find(i => i.mal_id === item.mal_id);
-            if (localSelectedStatus === "Rewatch" && findUserStatus.UserStatus !== "Rewatch") {
-
-                updatedEpisodes.length = 0;
-                localVolumesProgress = 0;
-            }
-
-            if (updatedEpisodes.length === item.chapters) {
-                if (selectedStatus === "Rewatch") {
-                    localRepeatCount += 1;
-                }
 
 
-                localSelectedStatus = "Completed";
-                localVolumesProgress = item.volumes;
-                setSelectedStatus(localSelectedStatus);
-                // userStatus is rewatch then increase the repeat number
-
-                if (selectedStatus !== "Completed") {
-                    toast.success(`Congrat you completed the series!`);
-                }
-
-            }
-            const res = await fetch(`/api/watchlist/update/ce`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    mal_id: item.mal_id,
-                    title: item.title,
-                    image: item.images.webp.large_image_url,
-                    category: categoryType,
-                    itemType: itemType,
-                    priority: priority,
-                    chaptersProgress: updatedEpisodes.filter(ep => ep != null),
-                    VolumesProgress: localVolumesProgress,
-                    totalVolumes: item.volumes,
-                    userStatus: localSelectedStatus,
-                    totalChapters: item.chapters,
-                    rewatches: localRepeatCount,
-                    favorite: isFavorite,
-                    rating: rating,
-                    totalEpisodes: item.episodes,
-                    note: notes,
-                }),
-            });
-            const result = await res.json();
-            if (res.status === 200) {
-                toast.success(`Item Manga updated successfully!`);
-                onClose()
-            } else {
-
-                toast.error("❌ Something went wrong. Try again!");
-            }
-        }
-    }
+    let totalUnits = Array.from({ length: (commonData.itemType === "anime" ? animeDbDataList.totalEpisodes : mangaDbDataList.totalChapters) }, (_, i) => i + 1);
     return (
         <>
             <div className="fixed inset-0 z-60 flex items-center justify-center p-4 md:p-6 bg-black/90 backdrop-blur-md">
@@ -410,7 +269,7 @@ const UpdateForm = ({ item, status, onClose }) => {
                     <div className="relative h-40 md:h-56 shrink-0">
                         <div className="absolute top-0 w-full h-34 brightness-75 z-0">
                             <img
-                                src={item.images.jpg.large_image_url}
+                                src={item.bannerImage || item.coverImage?.extraLarge}
                                 alt=""
                                 className="w-full h-full object-cover opacity-30"
                             />
@@ -423,14 +282,14 @@ const UpdateForm = ({ item, status, onClose }) => {
                         <div className="absolute bottom-4 left-4 md:bottom-6 md:left-8 flex items-end gap-4 md:gap-8">
                             <div className='hidden sm:block w-24 h-32 md:w-32 md:h-44 rounded-xl overflow-hidden border-2 border-slate-700/50 shadow-2xl bg-slate-900 shrink-0'>
                                 <img
-                                    src={item.images.jpg.image_url}
+                                    src={item.coverImage?.extraLarge}
                                     width="120px"
                                     alt=""
                                     className="w-full h-full object-cover"
                                 />
                             </div>
                             <div className="pb-1 md:pb-2">
-                                <h2 className="text-2xl md:text-4xl font-bold font-display text-white tracking-tight leading-tight pb-10">  {item.title_english ?? item.title}</h2>
+                                <h2 className="text-2xl md:text-4xl font-bold font-display text-white tracking-tight leading-tight pb-10">  {item.title.english ?? item.title.romaji}</h2>
                             </div>
 
 
@@ -443,8 +302,8 @@ const UpdateForm = ({ item, status, onClose }) => {
                             <div className='flex flex-1 gap-3 md:gap-4 max-w-xl'>
                                 <div className='relative flex-1'>
                                     <select
-                                        value={selectedStatus}
-                                        onChange={(e) => setSelectedStatus(e.target.value)}
+                                        value={commonData.UserStatus}
+                                        onChange={(e) => setCommonData({ ...commonData, UserStatus: e.target.value })}
                                         className="glass-input rounded-xl w-full pl-3 pr-8 py-2.5 md:py-3 appearance-none text-xs md:text-sm font-medium">
                                         <option value="Continue">Set As Continue </option>
                                         <option value="Future">Set As Future </option>
@@ -458,8 +317,8 @@ const UpdateForm = ({ item, status, onClose }) => {
                                 </div>
                                 <div className='relative flex-1'>
                                     <select
-                                        value={priority}
-                                        onChange={(e) => setpriority(e.target.value)}
+                                        value={commonData?.priority ?? 0}
+                                        onChange={(e) => setCommonData({ ...commonData, priority: parseInt(e.target.value) })}
                                         className="glass-input rounded-xl w-full pl-3 pr-8 py-2.5 md:py-3 appearance-none text-xs md:text-sm font-medium">
                                         <option value={3}>High priority</option>
                                         <option value={2}>Medium priority</option>
@@ -469,9 +328,9 @@ const UpdateForm = ({ item, status, onClose }) => {
                                     <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 text-lg">expand_more</span>
                                 </div>
                                 <button className="flex items-center justify-center h-10.5 md:h-12 w-10.5 md:w-12 rounded-xl border border-slate-700/50 text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-all shrink-0"
-                                    onClick={() => setIsFavorite(!isFavorite)}
+                                    onClick={() => setCommonData({ ...commonData, favorite: !commonData.favorite })}
                                 >
-                                    <span className={`material-symbols-outlined text-bgsecondary ${isFavorite ? '[font-variation-settings:"FILL"_1]' : ''} text-xl`} >
+                                    <span className={`material-symbols-outlined text-bgsecondary ${commonData.favorite ? '[font-variation-settings:"FILL"_1]' : ''} text-xl`} >
                                         favorite
                                     </span>
                                 </button>
@@ -494,20 +353,35 @@ const UpdateForm = ({ item, status, onClose }) => {
                                         <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.15em] block ml-1">No of Rewatch</label>
                                         <div className="flex h-11">
                                             <span className="bg-bgsecondary/10 text-bgsecondary border border-bgsecondary/20 border-r-0 px-2.5 text-[9px] font-bold rounded-l-xl flex items-center uppercase">Rwtch</span>
-                                            <input type="number" className="glass-input rounded-r-xl w-full text-center py-2 font-display text-lg font-semibold" value={repeatCount} onChange={(e) => { setRepeatCount(e.target.value < 0 ? 0 : e.target.value) }} />
+                                            <input type="number" className="glass-input rounded-r-xl w-full text-center py-2 font-display text-lg font-semibold" value={commonData.repeat} onChange={(e) => { setCommonData({ ...commonData, repeat: e.target.value < 0 ? 0 : e.target.value }) }} />
                                         </div>
                                     </div>
                                     <div className='space-y-2.5'>
-                                        {itemType === "anime" ? (
+                                        {commonData.itemType === "anime" ? (
                                             <>
                                                 <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.15em] block ml-1">No of Progress</label>
                                                 <div className="flex h-11">
                                                     <span className="bg-bgsecondary/10 text-bgsecondary border border-bgsecondary/20 border-r-0 px-2.5 text-[9px] font-bold rounded-l-xl flex items-center uppercase">{item.episodes}</span>
-                                                    <input type="number" className="glass-input rounded-r-xl w-full text-center py-2 font-display text-lg font-semibold" value={EPprogress} onChange={(e) => {
-                                                        const value = Number(e.target.value);
-                                                        setEPprogress(value > item.episodes ? item.episodes : value);
-                                                        updateEPCH(e.target.value)
-                                                    }} />
+                                                    <input type="number" className="glass-input rounded-r-xl w-full text-center py-2 font-display text-lg font-semibold"
+                                                        value={animeDbDataList.epProgress?.at(-1) ?? 0}
+                                                        onChange={(e) => {
+                                                            const rawValue = e.target.value;
+
+                                                            // Handle input clearing immediately
+                                                            if (rawValue === "") {
+                                                                setAnimeDbDataList({ ...animeDbDataList, epProgress: [] });
+                                                                return;
+                                                            }
+
+                                                            const value = Number(rawValue);
+                                                            const maxEp = value > item.episodes ? item.episodes : value;
+
+                                                            setAnimeDbDataList({
+                                                                ...animeDbDataList,
+                                                                epProgress: generateUnitSequence(maxEp)
+                                                            });
+                                                        }}
+                                                    />
                                                 </div>
                                             </>
                                         ) : (<>
@@ -519,7 +393,26 @@ const UpdateForm = ({ item, status, onClose }) => {
                                                     setEPprogress(value > item.episodes ? item.episodes : value);
                                                     updateEPCH(e.target.value)
                                                 }} /> */}
-                                                <input type="number" className="glass-input rounded-r-xl w-full text-center py-2 font-display text-lg font-semibold" value={CHprogress} onChange={(e) => { setCHprogress(e.target.value < 0 ? 0 : e.target.value > item.chapters ? item.chapters : e.target.value); updateEPCH(e.target.value) }} />
+                                                <input type="number" className="glass-input rounded-r-xl w-full text-center py-2 font-display text-lg font-semibold"
+                                                    value={mangaDbDataList.chProgress?.at(-1) ?? 0}
+                                                    onChange={(e) => {
+                                                        const rawValue = e.target.value;
+
+                                                        // Handle input clearing immediately
+                                                        if (rawValue === "") {
+                                                            setMangaDbDataList({ ...mangaDbDataList, chProgress: [] });
+                                                            return;
+                                                        }
+
+                                                        const value = Number(rawValue);
+                                                        const maxEp = value > item.episodes ? item.episodes : value;
+
+                                                        setMangaDbDataList({
+                                                            ...mangaDbDataList,
+                                                            chProgress: generateUnitSequence(maxEp)
+                                                        });
+                                                    }}
+                                                />
                                             </div>
                                         </>)}
                                     </div>
@@ -528,12 +421,20 @@ const UpdateForm = ({ item, status, onClose }) => {
                                         <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.15em] block ml-1">No of Rating</label>
                                         <div className="flex h-11">
                                             <span className="bg-bgsecondary/10 text-bgsecondary border border-bgsecondary/20 border-r-0 px-2.5 text-[9px] font-bold rounded-l-xl flex items-center uppercase">10</span>
-                                            <input type="number" className="glass-input rounded-r-xl w-full text-center py-2 font-display text-lg font-semibold" value={rating} onChange={(e) => { setRating(e.target.value < 0 ? 0 : e.target.value > 10 ? 10 : e.target.value) }} />
+                                            <input type="number" className="glass-input rounded-r-xl w-full text-center py-2 font-display text-lg font-semibold" value={commonData?.rating ?? 0}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    setCommonData({
+                                                        ...commonData,
+                                                        rating: val === "" ? null : val < 0 ? 0 : val > 10 ? 10 : parseInt(val)
+                                                    })
+                                                }}
+                                            />
                                         </div>
 
                                     </div>
                                 </div>
-                                {itemType === "manga" && (<div className='grid grid-cols-1 sm:grid-cols-3 gap-5'>
+                                {/* {itemType === "manga" && (<div className='grid grid-cols-1 sm:grid-cols-3 gap-5'>
                                     <div className='space-y-2.5'>
                                         <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.15em] block ml-1">No of VolumesProgress</label>
                                         <div className="flex h-11">
@@ -541,14 +442,14 @@ const UpdateForm = ({ item, status, onClose }) => {
                                             <input type="number" className="glass-input rounded-r-xl w-full text-center py-2 font-display text-lg font-semibold" value={VOLprogress} onChange={(e) => { setVOLprogress(e.target.value < 0 ? 0 : e.target.value > item.volumes ? item.volumes : e.target.value) }} />
                                         </div>
                                     </div>
-                                </div>)}
+                                </div>)} */}
 
                                 <div className='grid grid-cols-1 sm:grid-cols-3 gap-5'>
                                     <div className='space-y-2.5'>
                                         <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.15em] block ml-1">Start Date</label>
                                         <input type="date" className="glass-input rounded-xl w-full py-2.5 px-3 text-xs font-medium h-11" value={
-                                            startDate
-                                                ? new Date(startDate).toISOString().split("T")[0]
+                                            commonData.startDate
+                                                ? new Date(commonData.startDate).toISOString().split("T")[0]
                                                 : ""
                                         } readOnly />
 
@@ -556,16 +457,16 @@ const UpdateForm = ({ item, status, onClose }) => {
                                     <div className='space-y-2.5'>
                                         <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.15em] block ml-1">Finish Date</label>
                                         <input type="date" className="glass-input rounded-xl w-full py-2.5 px-3 text-xs font-medium h-11" value={
-                                            finishDate
-                                                ? new Date(finishDate).toISOString().split("T")[0]
+                                            commonData.endDate
+                                                ? new Date(commonData.endDate).toISOString().split("T")[0]
                                                 : ""
                                         } readOnly />
                                     </div>
                                     <div className='space-y-2.5'>
                                         <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.15em] block ml-1">Last Update</label>
                                         <input type="date" className="glass-input rounded-xl w-full py-2.5 px-3 text-xs font-medium h-11" value={
-                                            updatedDate
-                                                ? new Date(updatedDate).toISOString().split("T")[0]
+                                            commonData.updateAt
+                                                ? new Date(commonData.updateAt).toISOString().split("T")[0]
                                                 : ""
                                         } disabled />
 
@@ -578,44 +479,45 @@ const UpdateForm = ({ item, status, onClose }) => {
                                         id="note"
                                         className="glass-input rounded-2xl w-full p-4 resize-none text-sm leading-relaxed"
                                         placeholder="Add your personal thoughts..."
-                                        value={notes}
-                                        onChange={(e) => setNotes(e.target.value)}
+                                        value={commonData?.notes ?? ""}
+                                        onChange={(e) => setCommonData({ ...commonData, notes: e.target.value })}
                                     ></textarea>
                                 </div>
                             </div>
                             <div className='lg:col-span-2 xl:col-span-1 space-y-4 flex flex-col min-h-75 lg:h-full'>
                                 <div className="flex justify-between items-center mb-1">
 
-                                    <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.15em] ml-1">{itemType === "anime" ? "Episodes" : "Chapters"} Progress</label>
+                                    <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.15em] ml-1">{commonData.itemType === "anime" ? "Episodes" : "Chapters"} Progress</label>
                                     <div className="flex items-center gap-2 group cursor-pointer">
                                         {/* <input className="rounded border-slate-700 bg-slate-900 text-primary focus:ring-primary/20 h-4 w-4" id="watchall" type="checkbox" /> */}
                                         <input
                                             id="watchAll"
                                             type="checkbox"
                                             name="progressOption"
-                                            value={watchAll}
+                                            value={commonData.WatchAll}
                                             onChange={(e) => handleWatchAll(e.target.checked)}
                                             className="rounded border-slate-700 bg-slate-900 text-bgsecondary focus:ring-bgsecondary/20 h-4 w-4"
                                         />
                                         {/* <label className="text-xs font-medium text-slate-400 group-hover:text-slate-300 transition-colors cursor-pointer" for="watchall">Mark all watched</label> */}
                                         <label htmlFor="watchAll" className="text-xs font-medium text-slate-400 group-hover:text-slate-300 transition-colors cursor-pointer">
-                                            Watch All {itemType === "anime" ? "Episodes" : "Chapters"}
+                                            Watch All {commonData.itemType === "anime" ? "Episodes" : "Chapters"}
                                         </label>
                                     </div>
                                 </div>
                                 <div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 p-4 bg-slate-950/40 rounded-2xl border border-slate-800/80 grow max-h-75  overflow-y-auto scrollbar-hide mt-2'>
-                                    {episodes?.map((ep) => (
-                                        <div key={ep}
+                                    {totalUnits?.map((unit) => (
+                                        <div key={unit}
                                             className='flex items-center gap-2 md:gap-3 p-2 md:p-2.5 rounded-lg md:rounded-xl bg-slate-900/60 border border-slate-700/30 hover:border-bgsecondary/40 hover:bg-slate-800 transition-all cursor-pointer group'>
                                             <input
                                                 type="checkbox"
-                                                checked={selectedEpisodes.includes(ep)}
-                                                onChange={() => toggleEpisode(ep)}
+                                                checked={commonData.itemType === "anime" ? animeDbDataList.epProgress.includes(unit) : mangaDbDataList.chProgress.includes(unit)}
+                                                onChange={() => toggleEpisode(unit)}
                                                 className="rounded border-slate-700 bg-slate-900 text-primary focus:ring-primary/20 h-4 w-4"
+                                                name={`unit-${unit}`} id={`unit-${unit}`}
                                             />
                                             <label
-                                                className="text-[10px] md:text-xs font-medium text-slate-400 group-hover:text-white transition-colors"
-                                            > Ep {ep} </label>
+                                                className="text-[10px] md:text-xs font-medium text-slate-400 group-hover:text-white transition-colors" htmlFor={`unit-${unit}`}
+                                            > Ep {unit} </label>
                                         </div>
                                         // <label
                                         //     key={ep}
@@ -653,6 +555,7 @@ const UpdateForm = ({ item, status, onClose }) => {
 
         </>
     )
+
 }
 
 export default UpdateForm

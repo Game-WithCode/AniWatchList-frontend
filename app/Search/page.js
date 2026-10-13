@@ -1,102 +1,108 @@
 "use client"
 import React from 'react'
 import { useSearchParams, usePathname, useRouter, useParams } from 'next/navigation'
-import { Browse } from '@/lib/hooks/Browse'
-import { yearList } from "@/app/components/yearList";
+import { useSession } from "next-auth/react";
+import { searchAnilistMedia } from '@/lib/action/searchAnilistMedia'
+import { yearList } from './components/yearList'
 import { useEffect, useState } from 'react'
 import { allGenres } from '@/lib/hooks/Allgenre';
-import PaginationButtons from "@/app/components/PaginationButton";
+import PaginationButtons from './components/PaginationButton';
 import Link from 'next/link'
-import { set } from 'mongoose';
-
-// import SearchDetail from './SearchDetails'
-const Search = () => {
+const BrowsePage = ({ }) => {
+  const { data: session, status } = useSession();
   const searchParams = useSearchParams()
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
   const userName = params.userName;
-  const search = searchParams.get('q').toString() || "";
-  const searchType = searchParams.get('type').toString() || "";
+  const search = searchParams.get('type').toString() || "";
+  const query = searchParams.get('q') || "";
   const [allGenreOption, setallGenreOption] = useState([])
   const [itemList, setitemList] = useState([])
   const [SelectedGenre, setSelectedGenre] = useState([])
   const [SelectionType, setSelectionType] = useState([])
-  const [airingStatusObj, setairingStatusObj] = useState([])
   const [isOpen, setisOpen] = useState(false)
+  const [airingStatusObj, setairingStatusObj] = useState([
+    { label: "Currently Airing", value: "RELEASING" },
+    { label: "Finished Airing", value: "FINISHED" },
+    { label: "Not Yet Aired", value: "NOT_YET_RELEASED" },
+    { label: "Cancelled", value: "CANCELLED" },
+    { label: "Hiatus", value: "HIATUS" },
+  ])
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   //this variable to show that anime or manga is loading 
   const [isLoading, setIsLoading] = useState(false);
+
   const animeTypes = [
-    { label: "TV", value: "tv" },
-    { label: "Movie", value: "movie" },
-    { label: "OVA", value: "ova" },
-    { label: "ONA", value: "ona" },
-    { label: "Special", value: "special" },
-    { label: "Music", value: "music" }
+    { label: "TV", value: "TV" },
+    { label: "TV Short", value: "TV_SHORT" },
+    { label: "OVA", value: "OVA" },
+    { label: "ONA", value: "ONA" },
+    { label: "Special", value: "SPECIAL" },
+    { label: "Music", value: "MUSIC" },
+    { label: "Movie", value: "MOVIE" },
   ];
   const mangaTypes = [
-    { label: "Manga", value: "manga" },
-    { label: "Light Novel", value: "lightnovel" },
-    { label: "One-shot", value: "oneshot" },
-    { label: "Doujinshi", value: "doujin" },
-    { label: "Manhwa", value: "manhwa" },
-    { label: "Manhua", value: "manhua" }
-  ];
-
-  const airingStatusList = [
-    { label: "Currently Airing", value: "airing" },
-    { label: "Finished Airing", value: "complete" },
-    { label: "Not Yet Aired", value: "upcoming" },
-  ];
-  const mangaStatusList = [
-    { label: "Currently Airing", value: "publishing" },
-    { label: "On Break", value: "hiatus" },
-    { label: "Discontinued", value: "discontinued" },
-    { label: "Finished Airing", value: "complete" },
-    { label: "Not Yet Aired", value: "upcoming" },
+    { label: "Manga", value: "MANGA" },
+    { label: "Novel", value: "NOVEL" },
+    { label: "One shot", value: "ONE_SHOT" }
   ];
   const orderListOptions = [
-    { label: "Popularity", value: "popularity" },
-    { label: "Rank", value: "rank" },
-    { label: "Title", value: "title" },
-    { label: "Release Date", value: "start_date" },
-    { label: "End Date", value: "end_date" },
+    { label: "Popularity", value: "POPULARITY_DESC" },
+    { label: "Rank", value: "SCORE_DESC" },
+    { label: "Title", value: "TITLE_ENGLISH_DESC" },
+    { label: "Release Date", value: "START_DATE_DESC" },
+    { label: "End Date", value: "END_DATE_DESC" },
     { label: "Score", value: "score" },
-    ...(searchType === "anime" ? [{ label: "Episode", value: "episodes" }] : []),
+    ...(search === "anime" ? [{ label: "Episode", value: "EPISODES_DESC" }] : []),
 
     // You can also add a Manga check for "Chapters"
-    ...(searchType === "manga" ? [{ label: "Chapters", value: "chapters" }] : []),
+    ...(search === "manga" ? [{ label: "Chapters", value: "CHAPTERS_DESC" }] : []),
   ];
+  // useEffect(() => {
+  //   if (!search) return
+
+  //   const fetchData = async () => {
+  //     try {
+  //       const item = await Browse(search);
+  //       setitemList(item)
+
+  //     } catch (err) {
+  //       console.error(err)
+  //     }
+  //   }
+
+  //   fetchData()
+  // }, [search])
   const [filters, setFilters] = useState({
     Year: "all",
     Genre: ["all"],
-    Type: "all",
+    format: "all",
     minScore: 0,
     maxScore: 0,
     AiringStatus: "all",
-    orderBy: "all",
-    SearchType: searchType || "anime"
+    orderBy: "all"
   });
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
         const queryParams = {
-          query: search,
-          SearchTypeCategory: searchType,
+          search: searchParams.get('q'),
           page: searchParams.get('page'),
-          type: searchParams.get('itemtype'),
-          minScore: searchParams.get('minScore'),
-          maxScore: searchParams.get('maxScore'),
+          type: searchParams.get('type'),
+          averageScoreLesser: searchParams.get('maxScore'),
+          averageScoreGreater: searchParams.get('minScore'),
           status: searchParams.get('status'),
-          genres: searchParams.get('genres'),
-          orderBy: searchParams.get('orderBy'),
-          startYear: searchParams.get('startYear'),
+          genre: searchParams.get('genres'),
+          sort: searchParams.get('orderBy'),
+          startDate: searchParams.get('startYear'),
+          format: searchParams.get('format')
         };
-        const item = await Browse("Search", queryParams);
+        const item = await searchAnilistMedia({ ...queryParams });
         setitemList(item)
         setIsLoading(false);
+        setIsMobileFilterOpen(false); // Close mobile filter on filter change
         //set the filter according to url
         const params = new URLSearchParams(searchParams.toString());
         //First for year
@@ -113,22 +119,22 @@ const Search = () => {
           }))
         }
         //First for type (maovie,ova)
-        if (params.get("itemtype") !== null) {
+        if (params.get("format") !== null) {
           setFilters((prev) => ({
             ...prev,
-            Type: params.get('itemtype')
+            format: params.get('format')
           }))
         } else {
           setFilters((prev) => ({
             ...prev,
-            Type: "all"
+            format: "all"
           }))
         }
         //First for type (maovie,ova)
         if (params.get("minScore") !== null) {
           setFilters((prev) => ({
             ...prev,
-            minScore: params.get('minScore')
+            minScore: parseInt(params.get('minScore'))
           }))
         } else {
           setFilters((prev) => ({
@@ -140,7 +146,7 @@ const Search = () => {
         if (params.get("maxScore") !== null) {
           setFilters((prev) => ({
             ...prev,
-            maxScore: params.get('maxScore')
+            maxScore: parseInt(params.get('maxScore'))
           }))
         } else {
           setFilters((prev) => ({
@@ -172,25 +178,19 @@ const Search = () => {
             orderBy: "all"
           }))
         }
-        if (params.get("type") !== null) {
-          setFilters((prev) => ({
-            ...prev,
-            SearchType: params.get('type')
-          }))
-        }
         if (params.get("genres") !== null) {
-          // 1. Get the string (e.g., "1,2,3")
+          // 1. Get the string (e.g., "action,comedy,drama") from the URL parameter
           const genreString = params.get('genres');
 
           // 2. Split it and Map it
           // Check if genreString exists first to avoid errors if the URL param is missing
-          const arrGenreId = genreString
-            ? genreString.split(',')?.map(id => parseInt(id))
+          const currentGenre = genreString
+            ? genreString.split(',')?.map(i => i)
             : [];
-          const currentGenre = arrGenreId?.map((id) => {
-            return allGenreOption.find((item) => item.malId === id);
-          })
-            .filter((item) => item !== undefined);
+          // const currentGenre = arrGenreId?.map((i) => {
+          //   return allGenreOption?.data?.GenreCollection?.find((item) => item === i);
+          // })
+          //   .filter((item) => item !== undefined);
 
 
           // 4. Update State
@@ -213,14 +213,11 @@ const Search = () => {
 
 
   }, [searchParams.toString()])
-
-
-  //filter data
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
     let fetchData = async () => {
+      //for yearList
 
-      params.set('type', filters.SearchType);
       if (filters.Year == null || filters.Year == "all") {
         params.delete('startYear');
       } else {
@@ -230,22 +227,21 @@ const Search = () => {
       if (filters.Genre.length < 1 || filters.Genre[0] == null) {
         params.delete('genres');
       } else {
-        // 2. Extract only the IDs from the array of objects
-        const genreIds = filters.Genre?.map((g) => g.malId).join(",");
-
+        // 2. Extract genre from the array of objects
+        const genres = filters.Genre?.map((g) => g).join(",");
 
         // 3. Set the correct parameter name ('genres', not 'startYear')
-        params.set('genres', genreIds);
+        params.set('genres', genres);
       }
       //for type
-      if (filters.Type == "all" || filters.Type == null) {
-        params.delete('itemtype');
+      if (filters.format == "all" || filters.format == null) {
+        params.delete('format');
       } else {
         // 2. Extract only the IDs from the array of objects
 
 
         // 3. Set the correct parameter name ('genres', not 'startYear')
-        params.set('itemtype', filters.Type);
+        params.set('format', filters.format);
       }
       //airing status update
       if (filters.AiringStatus == "all" || filters.AiringStatus == null) {
@@ -273,54 +269,29 @@ const Search = () => {
         params.set('orderBy', filters.orderBy);
 
       }
-      // --- 2. NEW LOGIC: Compare and Reset Page ---
 
-      // Get the strings to compare if the URL is actually changing
-      const currentUrlString = searchParams.toString();
-      const newUrlString = params.toString();
 
-      // If the URL parameters are different, it means the filters (Year, Genre, etc.) have changed.
-      // We must check this condition to avoid an infinite loop or breaking normal pagination.
-      if (currentUrlString !== newUrlString) {
 
-        // Reset page to 1
-        params.set('page', '1');
-
-        router.push(`${pathname}?${params.toString()}`);
-      }
       router.push(`${pathname}?${params.toString()}`);
+
     }
 
     fetchData()
   }, [filters]);
-
-  //for genres
-  useEffect(() => {
-
-    setFilters((prev) => ({
-      ...prev, Genre: SelectedGenre
-    }))
-
-  }, [SelectedGenre])
-
-
   useEffect(() => {
     const fetch = async () => {
-      const allGenresData = await allGenres(searchType);
-      const genreData = allGenresData.data.map(item => ({
-        name: item.name,
-        malId: item.mal_id
-      }));
-      setallGenreOption(genreData);
-      if (searchType == 'anime') {
+      const allGenresData = await allGenres(search);
+
+      setallGenreOption(allGenresData);
+      if (search == 'anime') {
         setSelectionType(animeTypes)
-        setairingStatusObj(airingStatusList)
+
       } else {
         setSelectionType(mangaTypes)
-        setairingStatusObj(mangaStatusList)
+
 
       }
-      if (searchType === "anime") {
+      if (search === "anime") {
         orderListOptions.push({
           label: "Episode",
           value: "episodes"
@@ -331,8 +302,33 @@ const Search = () => {
     }
     fetch()
 
-  }, [searchParams])
+  }, [])
+  useEffect(() => {
 
+    setFilters((prev) => ({
+      ...prev, Genre: SelectedGenre
+    }))
+
+  }, [SelectedGenre])
+
+  useEffect(() => {
+    const fetchFilterData = async () => {
+      // Re-fetch genres based on the new type
+      const allGenresData = await allGenres();
+      setallGenreOption(allGenresData);
+
+      // Re-assign the dropdown arrays dynamically
+      if (search === 'anime') {
+        setSelectionType(animeTypes);
+      } else {
+        setSelectionType(mangaTypes);
+      }
+    };
+
+    fetchFilterData();
+
+    // The critical fix: React will now execute this effect whenever the URL 'type' changes.
+  }, [search]);
   let filterReset = () => {
     const params = new URLSearchParams(searchParams.toString());
     const newParams = new URLSearchParams()
@@ -343,7 +339,7 @@ const Search = () => {
     setFilters({
       Year: "all",
       Genre: ["all"],
-      Type: "all",
+      format: "all",
       minScore: 0,
       maxScore: 0,
       AiringStatus: "all",
@@ -353,53 +349,57 @@ const Search = () => {
 
     router.push(`${pathname}?${newParams.toString()}`);
   }
+  // console.log("allGenreOption", allGenreOption)
+  // console.log("itemList", itemList)
   let SearchTypeChanger = (newType) => {
-    const params = new URLSearchParams(searchParams.toString());
-    const newParams = new URLSearchParams()
+    const params = new URLSearchParams();
+    const currentQuery = searchParams.get('q');
 
-    // 1. Preserve the search query ('q')
-    const currentQuery = params.get('q');
     if (currentQuery) {
-      newParams.set('q', currentQuery)
+      params.set('q', currentQuery);
     }
 
-    // 2. Set the new Type correctly (matches your reading logic)
-    newParams.set('type', newType)
+    params.set('type', newType);
+    setisOpen(false);
 
-    // 3. Reset all filters
-    setFilters({
-      Year: "all",
-      Genre: ["all"],
-      Type: "all",
-      minScore: 0,
-      maxScore: 0,
-      AiringStatus: "all",
-      orderBy: "all",
-      SearchType: newType
-    })
-    setSelectedGenre([])
-
-    // 4. Close the dropdown menu
-    setisOpen(false)
-
-    // 5. Navigate
-    router.push(`${pathname}?${newParams.toString()}`);
+    // Pushing a fresh URL with no filter parameters will automatically 
+    // trigger your existing useEffect([searchParams]) to reset the filter state.
+    router.push(`${pathname}?${params.toString()}`);
   }
-
+  console.log("itemList?.data?.Page?.pageInfo?.total", itemList)
   return (
     <>
-      <div className='container mx-auto flex flex-col justify-center items-center gap-2'>
-        <h1 className='font-bold text-2xl'>You searched: <span className='text-bgsecondary text-3xl'>{search}</span></h1>
+      {/* make a blur layer and say user first sign in to see the content if user is not signed in */}
+
+
+      <div className='container mx-auto flex flex-col justify-center items-center gap-2 '>
+
+        {/* 1. Updated Authentication Overlay */}
+        {!(status === "authenticated") && (
+          // Changed to inset-0 and z-40
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-40">
+            <div className="bg-[#1e293b] p-6 rounded-lg text-center shadow-2xl border border-slate-700">
+              <h2 className="text-xl font-bold mb-4 text-white">Please sign in to see the content</h2>
+              <button
+                className="bg-bgsecondary text-white py-2 px-6 rounded-lg font-semibold hover:bg-opacity-90 transition-all"
+                onClick={() => router.push('/login')}
+              >
+                Sign In
+              </button>
+            </div>
+          </div>
+        )}
+        <h1 className='font-bold text-2xl'>You searched: <span className='text-bgsecondary text-3xl'>{query}</span></h1>
 
         <div className='relative group inline-block'>
-          <div className="flex gap-2 justify-center items-center text-textcolor hover:text-bgsecondary transition-colors border rounded-lg px-4 py-1 font-bold text-xl" onClick={() => setisOpen(!isOpen)}>{searchType === "anime" ? "Anime" : "Manga"}
+          <div className="flex gap-2 justify-center items-center text-textcolor hover:text-bgsecondary transition-colors border rounded-lg px-4 py-1 font-bold text-xl" onClick={() => setisOpen(!isOpen)}>{search === "anime" ? "Anime" : "Manga"}
             <span className="material-symbols-outlined">
               {isOpen ? "keyboard_arrow_up" : "keyboard_arrow_down"}
             </span>
           </div>
           {
             isOpen && (
-              <div className="absolute left-0 flex-col z-50 pt-2 w-max min-w-[120px]">
+              <div className="absolute left-0 flex-col z-50 pt-2 w-max min-w-30">
 
                 {/* Actual Menu Box (Separated so we can use padding above for the hover bridge) */}
                 <div className="bg-[#1e293b] rounded-lg px-4 py-3 shadow-xl border border-slate-700">
@@ -450,19 +450,19 @@ const Search = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 ">
             {/* card 1 */}
 
-            {itemList?.data?.map((item, index) => {
-              const type = (item.type === "TV" || item.type === "Movie" || item.type === "OVA" || item.type === "ONA" || item.type === "Special") ? "anime" : "manga";
+            {itemList?.data?.Page?.media?.map((item, index) => {
+              const type = item.type.toLowerCase();
               if (isLoading) {
                 return null; // Skip rendering items while loading
               }
 
               return (
-                <div key={`${item.mal_id}-${index
+                <div key={`${item.id}-${index
 
                   }`} className="group relative rounded-xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-bgsecondary/10 border border-slate-200 dark:border-slate-700 transition-all duration-300 hover:-translate-y-1 h-fit">
                   <figure className='aspect-2/3 overflow-hidden relative'>
                     <img
-                      src={item.images.webp.large_image_url}
+                      src={item.coverImage?.extraLarge || item.coverImage?.large || "/default-cover.jpg"}
                       alt="Anime"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
@@ -472,13 +472,13 @@ const Search = () => {
                       </span>
                     </div>
                   </figure>
-                  <div className="card-body flex flex-col gap-2 p-2 w-full">
-                    <h2 className="font-bold text-lg text-white dark:text-white mb-1 line-clamp-1 group-hover:text-bgsecondary transition-colors">{item.title_english ? item.title_english : item.title}</h2>
+                  <div className="card-body flex flex-col gap-2 p-2">
+                    <h2 className="font-bold text-lg text-white dark:text-white mb-1 line-clamp-1 group-hover:text-bgsecondary transition-colors">{item.title?.english || item.title?.romaji || "Unknown Title"}</h2>
                     <p className="text-gray-400 h-16 overflow-hidden ">
-                      {item.synopsis ?? "No synopsis available."}
+                      {item.description ?? "No synopsis available."}
                     </p>
                     <div className="card-actions flex justify-center mt-2 w-full">
-                      <button className="w-full py-2.5 rounded-lg bg-bgsecondary/20 dark:bg-bgsecondary/20 text-bgsecondary dark:text-bgsecondary/50 font-semibold text-sm hover:bg-bgsecondary hover:text-white dark:hover:bg-bgsecondary dark:hover:text-white transition-all" onClick={() => router.push(`/firstSignUp`)}>
+                      <button className="w-full py-2.5 rounded-lg bg-bgsecondary/20 dark:bg-bgsecondary/20 text-bgsecondary dark:text-bgsecondary/50 font-semibold text-sm hover:bg-bgsecondary hover:text-white dark:hover:bg-bgsecondary dark:hover:text-white transition-all" onClick={() => router.push(`/login`)}>
                         View Details
                       </button>
                     </div>
@@ -491,16 +491,20 @@ const Search = () => {
           <div className="mt-10 mb-5 flex justify-center">
             <PaginationButtons
               // Add ?. before accessing current_page
-              currentPage={itemList?.pagination?.current_page || 1}
+              currentPage={itemList?.data?.Page?.pageInfo?.currentPage || 1}
 
               // You already had it here, but ensure itemList is checked too
-              totalPages={itemList?.pagination?.last_visible_page || 1}
+              totalPages={itemList?.data?.Page?.pageInfo?.total || 1}
+              hasNextPage={itemList?.data?.Page?.pageInfo?.hasNextPage || false}
             />
 
           </div>
         </div>
+        {/* <div className="mt-10 mb-5 flex justify-center">
+          <PaginationButtons currentPage={rawData.pagination.current_page} totalPages={rawData.pagination?.last_visible_page || 1} query={query} type={type} />
 
-
+        </div> */}
+        {/* this for filter section */}
         <section className={`
     // 1. Mobile State Logic (Fixed overlay when open)
     ${isMobileFilterOpen ? "fixed inset-0 md:inset-1/2 z-50 md:w-1/2  h-fit md:top-20 overflow-y-auto rounded-none" : "hidden"}
@@ -519,7 +523,7 @@ const Search = () => {
               <span className="material-symbols-outlined">close</span>
             </button>
           </div>
-          <div className="flex items-center justify-between mb-6 mt-4">
+          <div className="flex items-center justify-between mb-6 mt-5">
             <h2 className="text-xl font-bold text-text-primary">Filters</h2>
             <button className="text-sm text-red-400 hover:text-red-500 font-medium" onClick={() => filterReset()}>Reset</button>
           </div>
@@ -587,39 +591,28 @@ const Search = () => {
                   className="w-full appearance-none rounded-lg bg-[#374151]  px-4 py-2 pr-10 text-gray-300 outline-none transition duration-200 hover:bg-[#374151]/80 focus:ring-2 focus:ring-bgsecondary/50"
                   onChange={(e) => {
 
-                    //get the genre mal id 
-                    const selectedId = parseInt(e.target.value);
-                    // get the full genre object from the list 
-                    const selectedGenreObj = allGenreOption.find((item) => item.malId === selectedId
-                    )
-
-                    //set the malId and name 
-                    if (selectedGenreObj) {
-                      setSelectedGenre((prev) => {
-                        const isDuplicate = prev.some((g) => g.malId === selectedId)
-                        if (isDuplicate) return prev
-                        return [
-                          ...prev,
-                          { malId: selectedId, name: selectedGenreObj.name }
-                        ]
-                      })
+                    //get the selected genre name from the select option
+                    const selectedGenreName = e.target.value;
+                    // Check if the selected genre is already in the SelectedGenre array
+                    const isDuplicate = SelectedGenre.some((g) => g === selectedGenreName);
+                    if (!isDuplicate) {
+                      setSelectedGenre((prev) => [...prev, selectedGenreName]);
                     }
-
                   }}
                   defaultValue=""
                 >
                   <option value="" disabled>Select a genre</option>
-                  {allGenreOption?.map((genre, index) => (
-                    <option key={"genres" + genre.malId + index} value={genre.malId} >
-                      {genre.name}
+                  {allGenreOption?.data?.GenreCollection?.map((genre, index) => (
+                    <option key={"genres" + index} value={genre} >
+                      {genre}
                     </option>
                   ))}
                 </select>
                 <div className="mt-2 flex flex-wrap gap-2 space-y-1">
                   {SelectedGenre.length > 0 && SelectedGenre?.map((item, index) => (
-                    <div className='relative' key={"selectedGenre" + item.malId + index}>
+                    <div className='relative' key={"selectedGenre" + index}>
                       <span className="mr-2 px-2 py-1 bg-gray-700 text-gray-200 rounded pr-5">
-                        {item.name}
+                        {item}
                       </span>
                       <span className="material-symbols-outlined absolute top-1/2 -translate-y-1/2 right-3 cursor-pointer hover:scale-105" style={{ fontSize: "14px" }}
                         onClick={() => {
@@ -640,7 +633,7 @@ const Search = () => {
             <hr className="border-t border-border-color" />
             {/* Type Filter */}
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-2">Type</label>
+              <label className="block text-sm font-medium text-text-primary mb-2">Format</label>
               <div className='flex w-full gap-2 flex-wrap relative'>
 
                 <select
@@ -650,14 +643,14 @@ const Search = () => {
                     const value = e.target.value
                     setFilters((prev) => ({
                       ...prev,
-                      Type: prev.Type === value ? "all" : value
+                      format: prev.format === value ? "all" : value
                     }))
                   }}
                   value={
-                    filters.Type == "all" ? "" : filters.Type
+                    filters.format == "all" ? "" : filters.format
                   }
                 >
-                  <option value="" disabled>Select a type</option>
+                  <option value="" disabled>Select a format</option>
                   {
                     SelectionType?.map((item, index) => (
                       <option key={"type" + index} value={item.value} >
@@ -666,13 +659,13 @@ const Search = () => {
                     ))
                   }
                 </select>
-                {filters.Type !== "all" &&
+                {filters.format !== "all" &&
                   <div className='absolute top-1/2 right-3 -translate-y-1/2 text-center flex items-center cursor-pointer'
                     onClick={
                       () => {
                         setFilters((prev) => ({
                           ...prev,
-                          Type: "all"
+                          format: "all"
                         })
                         )
                       }
@@ -743,39 +736,35 @@ const Search = () => {
                 <div className='flex w-full gap-2'>
                   <button
                     className={
-                      filters.maxScore == 5 ? "px-3 py-1.5 rounded-lg text-bgsecondary transition bg-bgsecondary/10 w-full" :
-                        "px-3 w-full py-1.5 rounded-lg bg-[#374151] text-gray-300 hover:text-bgsecondary transition hover:bg-bgsecondary/10"}
-                    onClick={
-                      (e) => {
-
-                        const value = e.target.value
-                        setFilters((prev) => ({
-                          ...prev,
-                          minScore: 0,
-                          maxScore: 5,
-                        }))
-                      }
+                      filters.maxScore === 5 ? "px-3 py-1.5 rounded-lg text-bgsecondary transition bg-bgsecondary/10 w-full" :
+                        "px-3 w-full py-1.5 rounded-lg bg-[#374151] text-gray-300 hover:text-bgsecondary transition hover:bg-bgsecondary/10"
                     }
-                    value={"0-5"}
-                  >0-5</button>
+                    onClick={() => {
+                      setFilters((prev) => ({
+                        ...prev,
+                        minScore: 0,
+                        maxScore: prev.maxScore === 5 ? 0 : 5, // Toggles between 0 and 5
+                      }));
+                    }}
+                  >
+                    0-5
+                  </button>
                   <button
                     className={
-                      filters.maxScore == 10 ? "px-3 py-1.5 rounded-lg text-bgsecondary transition bg-bgsecondary/10 w-full" :
-                        "px-3 w-full py-1.5 rounded-lg bg-[#374151] text-gray-300 hover:text-bgsecondary transition hover:bg-bgsecondary/10"}
-                    onClick={
-                      (e) => {
-                        const value = e.target.value
-                        setFilters((prev) => ({
-                          ...prev,
-                          minScore: 6,
-                          maxScore: 10,
-                        }))
-                      }
+                      filters.maxScore === 10 ? "px-3 py-1.5 rounded-lg text-bgsecondary transition bg-bgsecondary/10 w-full" :
+                        "px-3 w-full py-1.5 rounded-lg bg-[#374151] text-gray-300 hover:text-bgsecondary transition hover:bg-bgsecondary/10"
                     }
-                    value={"6-10"}
-                  >6-10</button>
+                    onClick={() => {
+                      setFilters((prev) => ({
+                        ...prev,
+                        minScore: prev.maxScore === 10 ? 0 : 5, // Closes the 51-59 gap
+                        maxScore: prev.maxScore === 10 ? 0 : 10, // Toggles between 0 and 10
+                      }));
+                    }}
+                  >
+                    5-10
+                  </button>
                 </div>
-
               </div>
             </div>
             <hr className="border-t border-border-color" />
@@ -810,10 +799,10 @@ const Search = () => {
             {/* this is end of space 4  */}
           </div>
         </section >
-      </div>
 
+      </div >
     </>
   )
 }
 
-export default Search
+export default BrowsePage

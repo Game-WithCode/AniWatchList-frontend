@@ -53,7 +53,7 @@ export async function POST(request) {
         let existing = await watchlist.watchlist[itemType].some((item) => item.
             mal_id === itemId);
         if (existing) {
-            return NextResponse.json({ message: "Already added" }, { status: 200 });
+            return NextResponse.json({ message: "Already added" }, { status: 201 });
         }
 
         if (itemType == "anime") {
@@ -100,7 +100,7 @@ export async function POST(request) {
         await watchlist.save();
         return NextResponse.json(
             { message: "Item added to watchlist successfully" },
-            { status: 201 }
+            { status: 200 }
         );
     }
     catch (error) {

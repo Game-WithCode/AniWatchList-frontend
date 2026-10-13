@@ -1,9 +1,9 @@
 import React from 'react'
 
-
+import { YouTubeEmbed } from '@next/third-parties/google'
 import ContinueBtn from './components/continueBtn';
-import { itemfind } from '@/lib/hooks/itemfind';
 
+import { GetMediaDetails } from '@/lib/action/GetAllDetails';
 export default async function ItemsPage({ params, searchParams }) {
     let params1 = await params;
     let searchDetail = await searchParams;
@@ -21,18 +21,19 @@ export default async function ItemsPage({ params, searchParams }) {
         type = 'anime';
     }
 
-     const api = process.env.NEXT_PUBLIC_BACKEND_URL
-    const res = await fetch(`${api}/api/${type}/${id}`, {
-        cache: "no-store",
-    });
-    if (!res.ok) {
-        console.error("Fetch failed with status:", res.status);
-        const text = await res.text(); // helpful for debugging
-        console.error("Response text:", text);
-        return <p>Error: Unable to fetch data ({res.status})</p>;
-    }
-    const data = await res.json();
-    const item = data.data;
+    //  const api = process.env.NEXT_PUBLIC_BACKEND_URL
+    // const res = await fetch(`${api}/api/${type}/${id}`, {
+    //     cache: "no-store",
+    // });
+    // if (!res.ok) {
+    //     console.error("Fetch failed with status:", res.status);
+    //     const text = await res.text(); // helpful for debugging
+    //     console.error("Response text:", text);
+    //     return <p>Error: Unable to fetch data ({res.status})</p>;
+    // }
+
+    const data = await GetMediaDetails(id);
+    const item = data.data?.Media;
 
     if (!item) return <p>Item not found</p>;
     // const result = await fetch("/api/watchlist/add", {
@@ -48,35 +49,33 @@ export default async function ItemsPage({ params, searchParams }) {
     return (
         <>
             <main className=" detailContainer  p-6">
-                {type === 'anime' ? (
-                    <div key={item.mal_id} className="flex flex-col lg:flex-row gap-12 mx-auto">
+                {item.type === 'ANIME' ? (
+                    <div key={id} className="flex flex-col lg:flex-row gap-12 mx-auto">
                         <div className="shrink-0 mx-auto lg:mx-0">
                             <div className="w-64 sm:w-72 lg:w-80 rounded-lg overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-slate-900">
                                 <img className="w-full h-full object-cover"
-                                    src={item.images.webp.large_image_url}
-                                    alt={item.title_english || item.title}
+                                    src={item.coverImage?.extraLarge}
+                                    alt={item.title.english || item.title}
                                 />
                             </div>
                         </div>
                         <div className="flex-1 space-y-8 pt-4">
                             <div>
                                 <h1 className="text-4xl lg:text-6xl font-bold font-display text-white leading-tight mb-4">
-                                    {item.title_english || item.title}
+                                    {item.title.english || item.title}
                                 </h1>
                                 <div className="flex flex-wrap gap-2 mb-6">
                                     {item.genres && item.genres.length > 0 ? (
-                                        item.genres?.map((genre) => <span key={genre.mal_id} className="px-3 py-1 bg-white/10 text-slate-200 text-xs font-medium rounded border border-white/5"> {genre.name} </span>)
+                                        item.genres?.map((genre, index) => <span key={index} className="px-3 py-1 bg-white/10 text-slate-200 text-xs font-medium rounded border border-white/5"> {genre} </span>)
                                     ) : (
                                         "N/A"
                                     )}
-                                    <span className="px-3 py-1 bg-white/10 text-slate-200 text-xs font-medium rounded border border-white/5">Adventure</span>
-                                    <span className="px-3 py-1 bg-white/10 text-slate-200 text-xs font-medium rounded border border-white/5">Drama</span>
-                                    <span className="px-3 py-1 bg-white/10 text-slate-200 text-xs font-medium rounded border border-white/5">Fantasy</span>
+
                                 </div>
                             </div>
                             <div className="max-w-3xl">
                                 <p className="text-slate-400 text-lg leading-relaxed ">
-                                    {item.synopsis}
+                                    {item.description.replace(/<[^>]+>/g, '') || 'N/A'}
                                 </p>
                             </div>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-8 gap-x-12 max-w-4xl py-6 border-y border-slate-800/50">
@@ -89,7 +88,7 @@ export default async function ItemsPage({ params, searchParams }) {
                                         >
                                             stars
                                         </span>
-                                        <span className="text-white text-lg font-bold">{item.score || 'N/A'}<span className="text-slate-500 font-normal text-sm">/10</span></span>
+                                        <span className="text-white text-lg font-bold">{(item.averageScore / 10).toFixed(0) || 'N/A'}<span className="text-slate-500 font-normal text-sm">/10</span></span>
                                     </div>
                                 </div>
                                 <div className="space-y-1">
@@ -102,7 +101,7 @@ export default async function ItemsPage({ params, searchParams }) {
                                             bar_chart
                                         </span>
 
-                                        <span className="text-white text-lg font-bold">#{item.rank || 'N/A'}</span>
+                                        <span className="text-white text-lg font-bold">#{item.rankings.find(r => r.allTime === true)?.rank || 'N/A'}</span>
                                     </div>
                                 </div>
                                 <div className="space-y-1">
@@ -114,7 +113,7 @@ export default async function ItemsPage({ params, searchParams }) {
                                 <div className="space-y-1">
                                     <span className="text-white font-bold text-sm block">Duration</span>
                                     <div className="flex items-center gap-2 text-white text-lg font-bold">
-                                        {item.duration || 'N/A'}
+                                        {item.duration || 'N/A'} min per episode
                                     </div>
                                 </div>
                                 <div className="space-y-1">
@@ -139,34 +138,31 @@ export default async function ItemsPage({ params, searchParams }) {
                         </div>
                     </div>
                 ) : (
-                    <div key={item.mal_id} className="flex flex-col lg:flex-row gap-12 mx-auto">
+                    <div key={id} className="flex flex-col lg:flex-row gap-12 mx-auto">
                         <div className="shrink-0 mx-auto lg:mx-0">
                             <div className="w-64 sm:w-72 lg:w-80 rounded-lg overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-slate-900">
                                 <img className="w-full h-full object-cover"
-                                    src={item.images.webp.large_image_url}
-                                    alt={item.title_english || item.title}
+                                    src={item.coverImage?.extraLarge}
+                                    alt={item.title.english || item.title.romji}
                                 />
                             </div>
                         </div>
                         <div className="flex-1 space-y-8 pt-4">
                             <div>
                                 <h1 className="text-4xl lg:text-6xl font-bold font-display text-white leading-tight mb-4">
-                                    {item.title_english || item.title}
+                                    {item.title.english || item.title.romji}
                                 </h1>
                                 <div className="flex flex-wrap gap-2 mb-6">
                                     {item.genres && item.genres.length > 0 ? (
-                                        item.genres?.map((genre) => <span key={genre.mal_id} className="px-3 py-1 bg-white/10 text-slate-200 text-xs font-medium rounded border border-white/5"> {genre.name} </span>)
+                                        item.genres?.map((genre, index) => <span key={index} className="px-3 py-1 bg-white/10 text-slate-200 text-xs font-medium rounded border border-white/5"> {genre} </span>)
                                     ) : (
                                         "N/A"
                                     )}
-                                    <span className="px-3 py-1 bg-white/10 text-slate-200 text-xs font-medium rounded border border-white/5">Adventure</span>
-                                    <span className="px-3 py-1 bg-white/10 text-slate-200 text-xs font-medium rounded border border-white/5">Drama</span>
-                                    <span className="px-3 py-1 bg-white/10 text-slate-200 text-xs font-medium rounded border border-white/5">Fantasy</span>
                                 </div>
                             </div>
                             <div className="max-w-3xl">
                                 <p className="text-slate-400 text-lg leading-relaxed ">
-                                    {item.synopsis}
+                                    {item.description.replace(/<[^>]+>/g, '') || 'N/A'}
                                 </p>
                             </div>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-8 gap-x-12 max-w-4xl py-6 border-y border-slate-800/50">
@@ -179,7 +175,7 @@ export default async function ItemsPage({ params, searchParams }) {
                                         >
                                             stars
                                         </span>
-                                        <span className="text-white text-lg font-bold">{item.score || 'N/A'}<span className="text-slate-500 font-normal text-sm">/10</span></span>
+                                        <span className="text-white text-lg font-bold">{(item.averageScore) / 10 || 'N/A'}<span className="text-slate-500 font-normal text-sm">/10</span></span>
                                     </div>
                                 </div>
                                 <div className="space-y-1">
@@ -192,7 +188,11 @@ export default async function ItemsPage({ params, searchParams }) {
                                             bar_chart
                                         </span>
 
-                                        <span className="text-white text-lg font-bold">#{item.rank || 'N/A'}</span>
+                                        <span className="text-white text-lg font-bold">#{item.rankings.map((r) => {
+                                            if (r.type === "POPULAR" && r.allTime === true) {
+                                                return r.rank;
+                                            }
+                                        }) || 'N/A'}</span>
                                     </div>
                                 </div>
                                 <div className="space-y-1">
@@ -265,16 +265,24 @@ export default async function ItemsPage({ params, searchParams }) {
                             <div className="h-px bg-linear-to-l from-transparent to-white/10 grow"></div>
                         </div>
                         <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] group ring-1 ring-white/5 hover:ring-primary/30 transition-all duration-500">
-                            {item.trailer && item.trailer.embed_url ? (
-                                <iframe
+                            {item.trailer && item.trailer.id ? (
+                                // <iframe
 
-                                    src={item.trailer.embed_url}
-                                    title={`${item.title_english || item.title} Trailer`}
-                                    frameBorder="0"
-                                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                    className="w-sm md:w-xl h-64 md:h-96"
-                                ></iframe>
+                                //     src={item.trailer.id ? `https://www.youtube.com/embed/${item.trailer.id}` : null}
+                                //     title={`${item.title.english || item.title.romaji} Trailer`}
+                                //     frameBorder="0"
+                                //     allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                //     allowFullScreen
+                                //     className="w-sm md:w-xl h-64 md:h-96"
+                                // ></iframe>
+                                <div className="w-xs lg:w-2xl md:w-xl mx-auto rounded-xl overflow-hidden aspect-video [&>iframe]:w-full [&>iframe]:h-full">
+                                    <YouTubeEmbed
+                                        videoid={item.trailer.id}
+                                        params="controls=1&rel=0"
+                                    // If the component throws an error without width/height props, 
+                                    // you can leave them; the Tailwind [&>iframe] selector will override them.
+                                    />
+                                </div>
                             ) : (
                                 <p className="text-xl ml-2 mt-2">No trailer available</p>
                             )}

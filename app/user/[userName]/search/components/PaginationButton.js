@@ -2,7 +2,7 @@
 
 import { useSearchParams, usePathname, useRouter } from 'next/navigation'
 
-export default function PaginationButtons({ currentPage, totalPages }) {
+export default function PaginationButtons({ currentPage, totalPages, hasNextPage }) {
     const searchParams = useSearchParams()
     const router = useRouter();
     const pathname = usePathname();
@@ -41,7 +41,7 @@ export default function PaginationButtons({ currentPage, totalPages }) {
                    transition-all duration-200 ease-in-out
                    hover:bg-bgsecondary hover:text-white hover:shadow-lg
                    disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed disabled:shadow-none'
-                disabled={currentPage >= totalPages}
+                disabled={currentPage >= totalPages || !hasNextPage}
             >
                 <span className="material-symbols-outlined">
                     chevron_right

@@ -1,7 +1,8 @@
 "use client"
 import React from 'react'
 import { useSearchParams, usePathname, useRouter, useParams } from 'next/navigation'
-import { Browse } from '@/lib/hooks/Browse'
+
+import { searchAnilistMedia } from '@/lib/action/searchAnilistMedia'
 import { yearList } from './components/yearList'
 import { useEffect, useState } from 'react'
 import { allGenres } from '@/lib/hooks/Allgenre';
@@ -18,51 +19,42 @@ const BrowsePage = ({ }) => {
   const [itemList, setitemList] = useState([])
   const [SelectedGenre, setSelectedGenre] = useState([])
   const [SelectionType, setSelectionType] = useState([])
-  const [airingStatusObj, setairingStatusObj] = useState([])
+  const [airingStatusObj, setairingStatusObj] = useState([
+    { label: "Currently Airing", value: "RELEASING" },
+    { label: "Finished Airing", value: "FINISHED" },
+    { label: "Not Yet Aired", value: "NOT_YET_RELEASED" },
+    { label: "Cancelled", value: "CANCELLED" },
+    { label: "Hiatus", value: "HIATUS" },
+  ])
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   //this variable to show that anime or manga is loading 
   const [isLoading, setIsLoading] = useState(false);
 
   const animeTypes = [
-    { label: "TV", value: "tv" },
-    { label: "Movie", value: "movie" },
-    { label: "OVA", value: "ova" },
-    { label: "ONA", value: "ona" },
-    { label: "Special", value: "special" },
-    { label: "Music", value: "music" }
+    { label: "TV", value: "TV" },
+    { label: "TV Short", value: "TV_SHORT" },
+    { label: "OVA", value: "OVA" },
+    { label: "ONA", value: "ONA" },
+    { label: "Special", value: "SPECIAL" },
+    { label: "Music", value: "MUSIC" },
+    { label: "Movie", value: "MOVIE" },
   ];
   const mangaTypes = [
-    { label: "Manga", value: "manga" },
-    { label: "Light Novel", value: "lightnovel" },
-    { label: "One-shot", value: "oneshot" },
-    { label: "Doujinshi", value: "doujin" },
-    { label: "Manhwa", value: "manhwa" },
-    { label: "Manhua", value: "manhua" }
-  ];
-
-  const airingStatusList = [
-    { label: "Currently Airing", value: "airing" },
-    { label: "Finished Airing", value: "complete" },
-    { label: "Not Yet Aired", value: "upcoming" },
-  ];
-  const mangaStatusList = [
-    { label: "Currently Airing", value: "publishing" },
-    { label: "On Break", value: "hiatus" },
-    { label: "Discontinued", value: "discontinued" },
-    { label: "Finished Airing", value: "complete" },
-    { label: "Not Yet Aired", value: "upcoming" },
+    { label: "Manga", value: "MANGA" },
+    { label: "Novel", value: "NOVEL" },
+    { label: "One shot", value: "ONE_SHOT" }
   ];
   const orderListOptions = [
-    { label: "Popularity", value: "popularity" },
-    { label: "Rank", value: "rank" },
-    { label: "Title", value: "title" },
-    { label: "Release Date", value: "start_date" },
-    { label: "End Date", value: "end_date" },
+    { label: "Popularity", value: "POPULARITY_DESC" },
+    { label: "Rank", value: "SCORE_DESC" },
+    { label: "Title", value: "TITLE_ENGLISH_DESC" },
+    { label: "Release Date", value: "START_DATE_DESC" },
+    { label: "End Date", value: "END_DATE_DESC" },
     { label: "Score", value: "score" },
-    ...(search === "anime" ? [{ label: "Episode", value: "episodes" }] : []),
+    ...(search === "anime" ? [{ label: "Episode", value: "EPISODES_DESC" }] : []),
 
     // You can also add a Manga check for "Chapters"
-    ...(search === "manga" ? [{ label: "Chapters", value: "chapters" }] : []),
+    ...(search === "manga" ? [{ label: "Chapters", value: "CHAPTERS_DESC" }] : []),
   ];
   // useEffect(() => {
   //   if (!search) return
@@ -82,7 +74,7 @@ const BrowsePage = ({ }) => {
   const [filters, setFilters] = useState({
     Year: "all",
     Genre: ["all"],
-    Type: "all",
+    format: "all",
     minScore: 0,
     maxScore: 0,
     AiringStatus: "all",
@@ -94,15 +86,16 @@ const BrowsePage = ({ }) => {
         setIsLoading(true);
         const queryParams = {
           page: searchParams.get('page'),
-          type: searchParams.get('itemtype'),
-          minScore: searchParams.get('minScore'),
-          maxScore: searchParams.get('maxScore'),
+          type: searchParams.get('type'),
+          averageScoreLesser: searchParams.get('maxScore'),
+          averageScoreGreater: searchParams.get('minScore'),
           status: searchParams.get('status'),
-          genres: searchParams.get('genres'),
-          orderBy: searchParams.get('orderBy'),
-          startYear: searchParams.get('startYear'),
+          genre: searchParams.get('genres'),
+          sort: searchParams.get('orderBy'),
+          startDate: searchParams.get('startYear'),
+          format: searchParams.get('format')
         };
-        const item = await Browse(search, queryParams);
+        const item = await searchAnilistMedia({ ...queryParams });
         setitemList(item)
         setIsLoading(false);
         setIsMobileFilterOpen(false); // Close mobile filter on filter change
@@ -122,15 +115,15 @@ const BrowsePage = ({ }) => {
           }))
         }
         //First for type (maovie,ova)
-        if (params.get("itemtype") !== null) {
+        if (params.get("format") !== null) {
           setFilters((prev) => ({
             ...prev,
-            Type: params.get('itemtype')
+            format: params.get('format')
           }))
         } else {
           setFilters((prev) => ({
             ...prev,
-            Type: "all"
+            format: "all"
           }))
         }
         //First for type (maovie,ova)
@@ -182,18 +175,18 @@ const BrowsePage = ({ }) => {
           }))
         }
         if (params.get("genres") !== null) {
-          // 1. Get the string (e.g., "1,2,3")
+          // 1. Get the string (e.g., "action,comedy,drama") from the URL parameter
           const genreString = params.get('genres');
 
           // 2. Split it and Map it
           // Check if genreString exists first to avoid errors if the URL param is missing
-          const arrGenreId = genreString
-            ? genreString.split(',')?.map(id => parseInt(id))
+          const currentGenre = genreString
+            ? genreString.split(',')?.map(i => i)
             : [];
-          const currentGenre = arrGenreId?.map((id) => {
-            return allGenreOption.find((item) => item.malId === id);
-          })
-            .filter((item) => item !== undefined);
+          // const currentGenre = arrGenreId?.map((i) => {
+          //   return allGenreOption?.data?.GenreCollection?.find((item) => item === i);
+          // })
+          //   .filter((item) => item !== undefined);
 
 
           // 4. Update State
@@ -230,21 +223,21 @@ const BrowsePage = ({ }) => {
       if (filters.Genre.length < 1 || filters.Genre[0] == null) {
         params.delete('genres');
       } else {
-        // 2. Extract only the IDs from the array of objects
-        const genreIds = filters.Genre?.map((g) => g.malId).join(",");
+        // 2. Extract genre from the array of objects
+        const genres = filters.Genre?.map((g) => g).join(",");
 
         // 3. Set the correct parameter name ('genres', not 'startYear')
-        params.set('genres', genreIds);
+        params.set('genres', genres);
       }
       //for type
-      if (filters.Type == "all" || filters.Type == null) {
-        params.delete('itemtype');
+      if (filters.format == "all" || filters.format == null) {
+        params.delete('format');
       } else {
         // 2. Extract only the IDs from the array of objects
 
 
         // 3. Set the correct parameter name ('genres', not 'startYear')
-        params.set('itemtype', filters.Type);
+        params.set('format', filters.format);
       }
       //airing status update
       if (filters.AiringStatus == "all" || filters.AiringStatus == null) {
@@ -284,17 +277,14 @@ const BrowsePage = ({ }) => {
   useEffect(() => {
     const fetch = async () => {
       const allGenresData = await allGenres(search);
-      const genreData = allGenresData.data?.map(item => ({
-        name: item.name,
-        malId: item.mal_id
-      }));
-      setallGenreOption(genreData);
+
+      setallGenreOption(allGenresData);
       if (search == 'anime') {
         setSelectionType(animeTypes)
-        setairingStatusObj(airingStatusList)
+
       } else {
         setSelectionType(mangaTypes)
-        setairingStatusObj(mangaStatusList)
+
 
       }
       if (search === "anime") {
@@ -338,6 +328,8 @@ const BrowsePage = ({ }) => {
 
     router.push(`${pathname}?${newParams.toString()}`);
   }
+  // console.log("allGenreOption", allGenreOption)
+  // console.log("itemList", itemList)
   return (
     <>
       {/* let add filter button for small screen so on click it will open modal for filter options */}
@@ -363,19 +355,19 @@ const BrowsePage = ({ }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 ">
             {/* card 1 */}
 
-            {itemList?.data?.map((item, index) => {
-              const type = (item.type === "TV" || item.type === "Movie" || item.type === "OVA" || item.type === "ONA" || item.type === "Special") ? "anime" : "manga";
+            {itemList?.data?.Page?.media?.map((item, index) => {
+              const type = item.type.toLowerCase();
               if (isLoading) {
                 return null; // Skip rendering items while loading
               }
 
               return (
-                <div key={`${item.mal_id}-${index
+                <div key={`${item.id}-${index
 
                   }`} className="group relative rounded-xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-bgsecondary/10 border border-slate-200 dark:border-slate-700 transition-all duration-300 hover:-translate-y-1 h-fit">
                   <figure className='aspect-2/3 overflow-hidden relative'>
                     <img
-                      src={item.images.webp.large_image_url}
+                      src={item.coverImage?.extraLarge || item.coverImage?.large || "/default-cover.jpg"}
                       alt="Anime"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
@@ -386,12 +378,12 @@ const BrowsePage = ({ }) => {
                     </div>
                   </figure>
                   <div className="card-body flex flex-col gap-2 p-2">
-                    <h2 className="font-bold text-lg text-white dark:text-white mb-1 line-clamp-1 group-hover:text-bgsecondary transition-colors">{item.title_english ? item.title_english : item.title}</h2>
+                    <h2 className="font-bold text-lg text-white dark:text-white mb-1 line-clamp-1 group-hover:text-bgsecondary transition-colors">{item.title?.english || item.title?.romaji || "Unknown Title"}</h2>
                     <p className="text-gray-400 h-16 overflow-hidden ">
-                      {item.synopsis ?? "No synopsis available."}
+                      {item.description ?? "No synopsis available."}
                     </p>
                     <div className="card-actions flex justify-center mt-2 w-full">
-                      <button className="w-full py-2.5 rounded-lg bg-bgsecondary/20 dark:bg-bgsecondary/20 text-bgsecondary dark:text-bgsecondary/50 font-semibold text-sm hover:bg-bgsecondary hover:text-white dark:hover:bg-bgsecondary dark:hover:text-white transition-all" onClick={() => router.push(`/user/${userName}/items?id=${item.mal_id}&type=${type}`)}>
+                      <button className="w-full py-2.5 rounded-lg bg-bgsecondary/20 dark:bg-bgsecondary/20 text-bgsecondary dark:text-bgsecondary/50 font-semibold text-sm hover:bg-bgsecondary hover:text-white dark:hover:bg-bgsecondary dark:hover:text-white transition-all" onClick={() => router.push(`/user/${userName}/items?id=${item.id}&type=${type}`)}>
                         View Details
                       </button>
                     </div>
@@ -404,10 +396,11 @@ const BrowsePage = ({ }) => {
           <div className="mt-10 mb-5 flex justify-center">
             <PaginationButtons
               // Add ?. before accessing current_page
-              currentPage={itemList?.pagination?.current_page || 1}
+              currentPage={itemList?.data?.Page?.pageInfo?.currentPage || 1}
 
               // You already had it here, but ensure itemList is checked too
-              totalPages={itemList?.pagination?.last_visible_page || 1}
+              totalPages={itemList?.data?.Page?.pageInfo?.total || 1}
+              hasNextPage={itemList?.data?.Page?.pageInfo?.hasNextPage || false}
             />
 
           </div>
@@ -503,39 +496,28 @@ const BrowsePage = ({ }) => {
                   className="w-full appearance-none rounded-lg bg-[#374151]  px-4 py-2 pr-10 text-gray-300 outline-none transition duration-200 hover:bg-[#374151]/80 focus:ring-2 focus:ring-bgsecondary/50"
                   onChange={(e) => {
 
-                    //get the genre mal id 
-                    const selectedId = parseInt(e.target.value);
-                    // get the full genre object from the list 
-                    const selectedGenreObj = allGenreOption.find((item) => item.malId === selectedId
-                    )
-
-                    //set the malId and name 
-                    if (selectedGenreObj) {
-                      setSelectedGenre((prev) => {
-                        const isDuplicate = prev.some((g) => g.malId === selectedId)
-                        if (isDuplicate) return prev
-                        return [
-                          ...prev,
-                          { malId: selectedId, name: selectedGenreObj.name }
-                        ]
-                      })
+                    //get the selected genre name from the select option
+                    const selectedGenreName = e.target.value;
+                    // Check if the selected genre is already in the SelectedGenre array
+                    const isDuplicate = SelectedGenre.some((g) => g === selectedGenreName);
+                    if (!isDuplicate) {
+                      setSelectedGenre((prev) => [...prev, selectedGenreName]);
                     }
-
                   }}
                   defaultValue=""
                 >
                   <option value="" disabled>Select a genre</option>
-                  {allGenreOption.map((genre, index) => (
-                    <option key={"genres" + genre.malId + index} value={genre.malId} >
-                      {genre.name}
+                  {allGenreOption?.data?.GenreCollection?.map((genre, index) => (
+                    <option key={"genres" + index} value={genre} >
+                      {genre}
                     </option>
                   ))}
                 </select>
                 <div className="mt-2 flex flex-wrap gap-2 space-y-1">
                   {SelectedGenre.length > 0 && SelectedGenre?.map((item, index) => (
-                    <div className='relative' key={"selectedGenre" + item.malId + index}>
+                    <div className='relative' key={"selectedGenre" + index}>
                       <span className="mr-2 px-2 py-1 bg-gray-700 text-gray-200 rounded pr-5">
-                        {item.name}
+                        {item}
                       </span>
                       <span className="material-symbols-outlined absolute top-1/2 -translate-y-1/2 right-3 cursor-pointer hover:scale-105" style={{ fontSize: "14px" }}
                         onClick={() => {
@@ -556,7 +538,7 @@ const BrowsePage = ({ }) => {
             <hr className="border-t border-border-color" />
             {/* Type Filter */}
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-2">Type</label>
+              <label className="block text-sm font-medium text-text-primary mb-2">Format</label>
               <div className='flex w-full gap-2 flex-wrap relative'>
 
                 <select
@@ -566,14 +548,14 @@ const BrowsePage = ({ }) => {
                     const value = e.target.value
                     setFilters((prev) => ({
                       ...prev,
-                      Type: prev.Type === value ? "all" : value
+                      format: prev.format === value ? "all" : value
                     }))
                   }}
                   value={
-                    filters.Type == "all" ? "" : filters.Type
+                    filters.format == "all" ? "" : filters.format
                   }
                 >
-                  <option value="" disabled>Select a type</option>
+                  <option value="" disabled>Select a format</option>
                   {
                     SelectionType?.map((item, index) => (
                       <option key={"type" + index} value={item.value} >
@@ -582,13 +564,13 @@ const BrowsePage = ({ }) => {
                     ))
                   }
                 </select>
-                {filters.Type !== "all" &&
+                {filters.format !== "all" &&
                   <div className='absolute top-1/2 right-3 -translate-y-1/2 text-center flex items-center cursor-pointer'
                     onClick={
                       () => {
                         setFilters((prev) => ({
                           ...prev,
-                          Type: "all"
+                          format: "all"
                         })
                         )
                       }
@@ -659,58 +641,35 @@ const BrowsePage = ({ }) => {
                 <div className='flex w-full gap-2'>
                   <button
                     className={
-                      filters.maxScore == 5 ? "px-3 py-1.5 rounded-lg text-bgsecondary transition bg-bgsecondary/10 w-full" :
-                        "px-3 w-full py-1.5 rounded-lg bg-[#374151] text-gray-300 hover:text-bgsecondary transition hover:bg-bgsecondary/10"}
-                    onClick={(e) => {
-                      setFilters((prev) => {
-                        // 1. Check the condition based on the PREVIOUS state
-                        if (prev.maxScore === 5) {
-                          // 2. Return the object for the 'if' case
-                          return {
-                            ...prev,
-                            minScore: 0,
-                            maxScore: 0,
-                          };
-                        } else {
-                          // 3. Return the object for the 'else' case
-                          return {
-                            ...prev,
-                            minScore: 0,
-                            maxScore: 5,
-                          };
-                        }
-                      });
+                      filters.maxScore === 5 ? "px-3 py-1.5 rounded-lg text-bgsecondary transition bg-bgsecondary/10 w-full" :
+                        "px-3 w-full py-1.5 rounded-lg bg-[#374151] text-gray-300 hover:text-bgsecondary transition hover:bg-bgsecondary/10"
+                    }
+                    onClick={() => {
+                      setFilters((prev) => ({
+                        ...prev,
+                        minScore: 0,
+                        maxScore: prev.maxScore === 5 ? 0 : 5, // Toggles between 0 and 5
+                      }));
                     }}
-                    value={"0-5"}
-                  >0-5</button>
+                  >
+                    0-5
+                  </button>
                   <button
                     className={
-                      filters.maxScore == 10 ? "px-3 py-1.5 rounded-lg text-bgsecondary transition bg-bgsecondary/10 w-full" :
-                        "px-3 w-full py-1.5 rounded-lg bg-[#374151] text-gray-300 hover:text-bgsecondary transition hover:bg-bgsecondary/10"}
-                    onClick={(e) => {
-                      setFilters((prev) => {
-                        // 1. Check the condition based on the PREVIOUS state
-                        if (prev.maxScore === 10) {
-                          // 2. Return the object for the 'if' case
-                          return {
-                            ...prev,
-                            minScore: 0,
-                            maxScore: 0,
-                          };
-                        } else {
-                          // 3. Return the object for the 'else' case
-                          return {
-                            ...prev,
-                            minScore: 6,
-                            maxScore: 10,
-                          };
-                        }
-                      });
+                      filters.maxScore === 10 ? "px-3 py-1.5 rounded-lg text-bgsecondary transition bg-bgsecondary/10 w-full" :
+                        "px-3 w-full py-1.5 rounded-lg bg-[#374151] text-gray-300 hover:text-bgsecondary transition hover:bg-bgsecondary/10"
+                    }
+                    onClick={() => {
+                      setFilters((prev) => ({
+                        ...prev,
+                        minScore: prev.maxScore === 10 ? 0 : 5, // Closes the 51-59 gap
+                        maxScore: prev.maxScore === 10 ? 0 : 10, // Toggles between 0 and 10
+                      }));
                     }}
-                    value={"6-10"}
-                  >6-10</button>
+                  >
+                    5-10
+                  </button>
                 </div>
-
               </div>
             </div>
             <hr className="border-t border-border-color" />

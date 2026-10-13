@@ -7,7 +7,7 @@ import { ActivityFeed, getActionVerb } from "./ActivityFeed"
 import { formatDistanceToNow } from 'date-fns'; // Optional: for "2 hours ago" format 
 import { useRouter } from "next/navigation";
 import { usePathname, useParams } from 'next/navigation'
-import { getCategory } from '@/lib/hooks/getType'
+
 const UserStats = () => {
     const intialStats = {
         Total: 0,
